@@ -26,7 +26,7 @@ const SPAL = {
   treeA: ['#2f7d32', '#45a047', '#1f5c26', '#6b4a2a'], treeB: ['#3a8a30', '#58b048', '#27682a', '#6b4a2a'], treeC: ['#2a7040', '#3f9558', '#1c5230', '#5d4025'],
   pine: ['#2c5d4f', '#f4f8fa', '#1c4539', '#5d4025'], mount: ['#8b8b93', '#a8a8b0', '#65656e', '', '#f4f6fa'],
   hill: ['#8da456', '#a5bd6c', '#6d8140'], rock: ['#9a9aa2', '#b9b9c0', '#74747c'], ore: ['#8a8a92', '#a9a9b0', '#686870', '', '', '#3d5a9e'],
-  gold: ['#9a9aa2', '#b9b9c0', '#74747c', '', '', '#f7c62f'], bush: ['#3c8f3c', '#52a850', '#2a6a2c', '', '', '#d8344a'], cactus: ['#3f8f4a']
+  gold: ['#9a9aa2', '#b9b9c0', '#74747c', '', '', '#f7c62f'], copper: ['#8f8a86', '#aaa49e', '#6c6763', '', '', '#e07a2c'], coal: ['#77777f', '#8e8e96', '#55555c', '', '', '#15151a'], gem: ['#8a8a96', '#a9a9b6', '#666672', '', '', '#4fe3e8'], iron: ['#8a8a92', '#a9a9b0', '#686870', '', '', '#b5543a'], bush: ['#3c8f3c', '#52a850', '#2a6a2c', '', '', '#d8344a'], cactus: ['#3f8f4a']
 };
 for (const k in SPAL) SPAL[k] = SPAL[k].map(h => h ? C(h) : 0);
 const FOAM = C('#bfe3f7'), FLOWERS = ['#f7e15c', '#ffffff', '#f29ac0'].map(C), DARKGRASS = C('#559636');
@@ -73,8 +73,7 @@ function tilePixels(x, y, buf, o, stride) {
   const f = G.feat[i];
   if (f === F_BERRY) stamp(buf, o, stride, G.amt[i] > 0 ? STAMP.bush : STAMP.bush0, SPAL.bush);
   else if (f === F_STONE) stamp(buf, o, stride, STAMP.rock, SPAL.rock);
-  else if (f === F_ORE) stamp(buf, o, stride, STAMP.ore, SPAL.ore);
-  else if (f === F_GOLD) stamp(buf, o, stride, STAMP.ore, SPAL.gold);
+  else if (f >= F_ORE) stamp(buf, o, stride, STAMP.ore, f === F_ORE ? SPAL.iron : f === F_GOLD ? SPAL.gold : f === F_COPPER ? SPAL.copper : f === F_COAL ? SPAL.coal : SPAL.gem);
 }
 
 /* ----- Sprites ----- */
@@ -97,6 +96,10 @@ const USPR = {
   rabbit: [['...ee', '.bbbk', 'bbbbb', '.b.b.'], ['...ee', '.bbbk', 'bbbbb', 'b...b']],
   wolf: [['.....gg.', 'ggggggk.', 'dgggggg.', '.g...g..', '.g...g..'], ['.....gg.', 'ggggggk.', 'dgggggg.', '.g...g..', 'g.....g.']],
   bear: [['.......b.', '.bbbbbbbb', 'bbbbbbbkb', 'bbbbbbbb.', '.bb..bb..', '.bb..bb..'], ['.......b.', '.bbbbbbbb', 'bbbbbbbkb', 'bbbbbbbb.', '.bb..bb..', 'bb....bb.']],
+  deer: [['.....a.a', '......dd', '.dddddde', 'wddddd..', '.d...d..', '.d...d..'], ['.....a.a', '......dd', '.dddddde', 'wddddd..', '.d...d..', 'd.....d.']],
+  cow: [['......h.h', '.wwkkwwww', 'wwwkkwwwe', 'wkwwwwwp.', '.w...w...', '.w...w...'], ['......h.h', '.wwkkwwww', 'wwwkkwwwe', 'wkwwwwwp.', '.w...w...', 'w.....w..']],
+  fox: [['......o.', 'wooooooe', '.oooooo.', '.o....o.'], ['......o.', 'wooooooe', '.oooooo.', 'o......o']],
+  boar: [['..bbbb..', 'bbbbbbbe', 'bbbbbbbt', '.b...b..', '.b...b..'], ['..bbbb..', 'bbbbbbbe', 'bbbbbbbt', '.b...b..', 'b.....b.']],
   dragon: [
     ['....WW......', '...WWWW.....', '..WWWWWW..hh', 'rrRRRRRRRhhe', '..RRRRRRRRhh', 't..RRRRRR...', 'tt.R....R...', '.ttt........'],
     ['............', '............', '..........hh', 'rrRRRRRRRhhe', '..RRRRRRRRhh', 't.WWWWWWR...', 'tt.WWWW.R...', '.ttt.WW.....']],
@@ -106,44 +109,81 @@ const UPAL = {
   human: { h: '#6b4423', s: '#f0c8a0', d: '#3a3a4a' }, elf: { h: '#f0d878', s: '#f6dcc0', d: '#3a4a3a' }, orc: { h: '#2e2e2e', s: '#6aa84f', d: '#3a2e24', t: '#ffffff' },
   dwarf: { h: '#9aa0a8', s: '#e8b890', d: '#3a2e24', b: '#c8641e' }, skeleton: { h: '#e8e8e0', s: '#e8e8e0', d: '#b8b8b0', c: '#cfcfc6', x: '#9a9a9a' },
   sheep: { w: '#f4f4f0', k: '#3a3a3a' }, rabbit: { b: '#c9a27a', e: '#b08a64', k: '#2a2a2a' }, wolf: { g: '#8a8a94', d: '#6a6a74', k: '#2a2a2a' }, bear: { b: '#7a4a28', k: '#1a1a1a' },
+  deer: { d: '#a8763e', a: '#e8dcc0', w: '#f4f0e4', e: '#2a1a10' }, cow: { w: '#f2efe8', k: '#3a3230', h: '#d8d0b8', e: '#1a1a1a', p: '#e8a0a0' }, fox: { o: '#e07a2c', w: '#f8f4ec', e: '#1a1a1a' }, boar: { b: '#5a4032', e: '#1a1a1a', t: '#f4f0e4' },
   dragon: { W: '#c23a2a', R: '#e0493a', r: '#a02a20', h: '#e0493a', e: '#ffe14a', t: '#a02a20' }
 };
 const BSPR = {
-  house0: ['........', '...RR...', '..RRRr..', '.RRRRrr.', '.RRRRrr.', '.WWDWww.', '.WWDWww.', '........'],
-  house1: ['..RRRr..', '.RRRRrr.', 'RRRRRrrr', 'RRRRRrrr', '.WWWWww.', '.WGWDww.', '.WWWDww.', '........'],
-  house2: ['..RRRr..', '.RRRRrr.', 'RRRRRrrr', '.WGWGww.', '.WWWWww.', 'RRRRRrrr', '.WGWWww.', '.WWDWww.', '.WWDWww.'],
+  // humans: thatch → tiled cottages → timber townhouses
+  house0_0: ['........', '..TTTt..', '.TTTTtt.', 'TTTTTttt', '.WWWWww.', '.WWDWww.', '.WWDWww.', '........'],
+  house0_1: ['.....K..', '..RRRK..', '.RRRRrr.', 'RRRRRrrr', '.WWWWww.', '.WGWDww.', '.WWWDww.', '........'],
+  house0_2: ['.....K..', '..RRRKr.', '.RRRRrr.', 'RRRRRrrr', '.WGWGww.', '.KKKKKK.', '.WGWDww.', '.WWWDww.', '........'],
+  house0_3: ['..RRRr.K', '.RRRRrrK', 'RRRRRrrr', '.WGWGww.', '.WWWWww.', '.KKKKKK.', '.WGWGww.', '.WWWWww.', '.WGDDGw.', '.WWDDWw.', '........'],
+  // elves: living tree-houses
+  house1_0: ['..LLLl..', '.LLLLLl.', 'LLLLLLll', '.LLLLll.', '..WDww..', '..WDww..', '........'],
+  house1_1: ['..LLLl..', '.LLLLLl.', 'LLLLLLll', 'LLGLLLll', '.LLLLll.', '..WWww..', '.WWDWww.', '........'],
+  house1_2: ['...LLl..', '..LLLLl.', '.LLLLLll', 'LLLGLLll', 'LLLLLLll', '.LLWwll.', '.LLWwLl.', '..WGww..', '.WWDWww.', '........'],
+  house1_3: ['...LLl..', '..LLLLl.', '.LLLGLll', 'LLLLLLll', '.LLLLll.', '..WWww..', '.LLWwLl.', 'LLLGLLll', '.LLLLll.', '..WGww..', '.WWDWww.', '........'],
+  // orcs: hide tents and spiked longhouses
+  house2_0: ['...B....', '...HB...', '..HHh...', '..HHhh..', '.HHDhh..', '.HHDhhh.', 'HHHDhhhh', '........'],
+  house2_1: ['B......B', 'B.HHHh.B', '.HHHHhh.', 'HHHHHhhh', 'HFHHHhFh', '.WWDWww.', '.WWDWww.', '........'],
+  house2_2: ['B..BB..B', 'BHHHHhhB', 'HHHHHhhh', 'HHFHHFhh', 'WWWWWwww', 'WGWDDwGw', 'WWWDDwww', '........'],
+  house2_3: ['B.B..B.B', 'BHHHHhhB', 'HHHHHhhh', 'WWFWWFww', 'WWWWWwww', 'HHHHHhhh', 'WGWWWwGw', 'WWWDDwww', 'WWWDDwww', '........'],
+  // dwarves: stone halls
+  house3_0: ['........', '........', '.SSSSSs.', 'SSSSSSss', 'SsSSSsSs', 'SSSDDSss', 'SSSDDSss', '........'],
+  house3_1: ['.....KK.', '.RRRRKK.', 'RRRRRRrr', 'SSSSSSss', 'SOSSSOss', 'SSSDDSss', 'SSSDDSss', '........'],
+  house3_2: ['.....KK.', '.RRRRKK.', 'RRRRRRrr', 'SOSSSOss', 'SSSSSSss', 'sSsSsSsS', 'SOSDDSOs', 'SSSDDSss', '........'],
+  house3_3: ['S.S..S.S', 'SSSSSSss', 'SOSSSOss', 'SSSSSSss', 'RRRRRRrr', 'SOSSSOss', 'SSSSSSss', 'sSsSsSsS', 'SOSDDSOs', 'SSSDDSss', '........'],
   hall: ['.....KFF....', '.....KFF....', '.....K......', '...RRRRRr...', '..RRRRRRrr..', '.RRRRRRRrrr.', 'RRRRRRRRrrrr', '.WWWWWWWwww.', '.WGWWWWWGww.', '.WWWDDWWwww.', '.WWWDDWWwww.', '.SSSSSSSsss.'],
   barracks: ['.FF.....', '.K.S.S.S', '.KSSSSSs', '.SSSSSSs', '.SKSSKSs', '.SSSSSSs', '.SSDDSSs', '.SSDDSSs'],
   market: ['........', '.FYFYFY.', 'FYFYFYFY', '.K....K.', '.KWWWWK.', '.WYWOWw.', '.WWWWWw.', '........'],
   tower: ['.FF.....', '.K......', '.S.SS.S.', '.SSSSSs.', '.SSSSSs.', '..SSSs..', '..SKSs..', '..SSSs..', '..SKSs..', '.SSDSSs.', '.SSDSSs.'],
   temple: ['...YY...', '...YY...', '..SSSs..', '.SSSSSs.', 'SSSSSSSs', '.S.S.Ss.', '.S.S.Ss.', 'SSSSSSSs'],
   smithy: ['.....KK.', '.....KK.', '.rrrrKK.', 'rrrrrrr.', '.SSSSSs.', '.SOSDSs.', '.SSSDSs.', '........'],
+  mine: ['........', '..SSSs..', '.SSSSSs.', 'SSTTTTss', 'SSTXXTss', 'SSTXXTss', 'sSTXXTsO', '........'],
+  sawmill: ['........', '.RRRRr..', 'RRRRRrr.', '.WWWWw..', '.WDWWw.E', '.WDWWEEE', '.....EEE', '........'],
+  dock: ['...F....', '...K....', '.RRRRr..', 'RRRRRrr.', '.WWDWw..', 'EEEEEEEE', 'E.E..E.E', '........'],
   site: ['........', '.K....K.', '.KKKKKK.', '.K.YY.K.', '.KKKKKK.', '.K.YY.K.', '.KWWWWK.', '........']
 };
 const BPAL = [
   { R: '#c0473a', r: '#96362d', W: '#e8d9b0', w: '#c9b88e', D: '#5a3a22' },
-  { R: '#3f9a58', r: '#2f7a45', W: '#f0ead8', w: '#d4ccb4', D: '#7a5a34' },
+  { R: '#3f9a58', r: '#2f7a45', W: '#f0ead8', w: '#d4ccb4', D: '#7a5a34', G: '#ffe98a' },
   { R: '#7a5a3a', r: '#5c432b', W: '#a08a6a', w: '#84705a', D: '#2e2218' },
   { R: '#4a5568', r: '#374151', W: '#b9b3ab', w: '#96908a', D: '#3a2a1a' }
 ];
-const BCOMMON = { S: '#a9a9b3', s: '#82828c', K: '#2a2a30', Y: '#f2c230', G: '#8fd3ff', O: '#ff9a3c' };
+const BCOMMON = { S: '#a9a9b3', s: '#82828c', K: '#2a2a30', Y: '#f2c230', G: '#8fd3ff', O: '#ff9a3c', T: '#d9b35a', t: '#b8923e', L: '#3f9a58', l: '#2a7040', H: '#9a6b42', h: '#74502f', B: '#f0ead8', X: '#141418', E: '#8a5a30' };
 const sprCache = new Map();
+const HAIRS = [['#6b4423', '#2a2220', '#d9b35a', '#b5522a'], ['#f0d878', '#e8e8f0', '#b5723a', '#f6e6a8'], ['#2e2e2e', '#4a2e22', '#2e2e2e', '#5a5a5a'], ['#c8641e', '#7a4a28', '#b9b9b9', '#a03a1a']];
+const ORC_SKIN = ['#6aa84f', '#7d9a3e', '#5a9a6a', '#8aa860'];
+/** Female variants: longer hair and a dress; dwarven women go beardless. */
+function femaleRows(rows, key) {
+  const out = rows.map(r => r.split(''));
+  const face = out.findIndex(r => r.includes('s'));
+  if (key === 'dwarf') { for (const r of out) for (let i = 0; i < r.length; i++) if (r[i] === 'b') r[i] = 'c'; }
+  if (key === 'orc') { if (face >= 0) { out[face][1] = 'h'; out[face][2] = 'h'; out[face][3] = 'h'; } }
+  else if (face >= 0) { if (out[face][0] === '.') out[face][0] = 'h'; if (out[face][4] === '.') out[face][4] = 'h'; if (out[face + 1] && key !== 'dwarf') { if (out[face + 1][0] === '.') out[face + 1][0] = 'h'; } }
+  const legs = out.length - 2;
+  if (key !== 'orc' && out[legs]) { out[legs][0] = out[legs][0] === '.' ? 'c' : out[legs][0]; out[legs][1] = 'c'; out[legs][2] = 'c'; out[legs][3] = 'c'; out[legs][4] = out[legs][4] === '.' ? 'c' : out[legs][4]; }
+  return out.map(r => r.join(''));
+}
 function unitSprite(u, frame, flip, boat) {
   const k = KIND[u.kind], kd = u.kid ? G.kingdoms.get(u.kid) : null, col = kd ? KCOLORS[kd.color] : '#9a8f80';
-  const role = k.civ ? u.role : 0;
-  const key = (boat ? 'b' : u.kind) + '|' + col + '|' + role + '|' + frame + '|' + (flip ? 1 : 0);
+  const role = k.civ ? u.role : 0, old = k.civ && u.age > u.life * .78 ? 1 : 0, hv = k.civ ? (u.hair || 0) & 3 : 0, sex = k.civ ? u.sex : 0;
+  const key = (boat ? 'b' : u.kind) + '|' + col + '|' + role + '|' + frame + '|' + (flip ? 1 : 0) + '|' + sex + hv + old;
   let s = sprCache.get(key);
   if (!s) {
     if (boat) s = makeSprite(USPR.boat[0], { S: '#f4f0e4', c: col, K: '#5a3a22', B: '#7a5230' }, flip);
     else {
       const base = UPAL[k.key] || UPAL.human, pal = Object.assign({ c: col }, base);
+      let rows = USPR[k.key === 'skeleton' ? 'human' : k.key]; rows = rows[frame % rows.length];
       if (k.civ) {
+        const hc = old ? '#d8d8d8' : HAIRS[u.kind][hv];
+        if (u.kind === K_DWARF) { pal.b = hc; } else if (u.kind !== K_ORC) pal.h = hc; else { pal.s = ORC_SKIN[hv]; if (old) pal.h = '#9a9a9a'; }
         if (role === RL_SOLDIER) { pal.x = '#d8dce6'; pal.h = '#aab0bc'; }
         else if (role === RL_KING) { pal.h = '#ffd23c'; pal.x = '#ffd23c'; }
         else if (role === RL_TRADER) pal.x = '#b07840';
+        if (sex === 1 && role !== RL_SOLDIER) rows = femaleRows(rows, k.key);
       }
-      const rows = USPR[k.key === 'skeleton' ? 'human' : k.key];
-      s = makeSprite(rows[frame % rows.length], pal, flip);
+      s = makeSprite(rows, pal, flip);
     }
     sprCache.set(key, s);
   }
@@ -151,15 +191,16 @@ function unitSprite(u, frame, flip, boat) {
 }
 function bldSprite(b, v, kd) {
   let name;
-  if (!b.built) name = 'site';
-  else switch (b.type) { case B_HALL: name = 'hall'; break; case B_HOUSE: name = 'house' + Math.min(2, b.lvl); break; case B_BARRACKS: name = 'barracks'; break; case B_MARKET: name = 'market'; break; case B_TOWER: name = 'tower'; break; case B_TEMPLE: name = 'temple'; break; case B_SMITHY: name = 'smithy'; break; default: name = 'site'; }
+  switch (b.type) { case B_HALL: name = 'hall'; break; case B_HOUSE: name = 'house' + ((v ? v.race : 0) & 3) + '_' + Math.min(3, b.lvl); break; case B_MINE: name = 'mine'; break; case B_SAWMILL: name = 'sawmill'; break; case B_DOCK: name = 'dock'; break; case B_BARRACKS: name = 'barracks'; break; case B_MARKET: name = 'market'; break; case B_TOWER: name = 'tower'; break; case B_TEMPLE: name = 'temple'; break; case B_SMITHY: name = 'smithy'; break; default: name = 'site'; }
   const race = v ? v.race : 0, col = kd ? KCOLORS[kd.color] : '#999';
   const key = 'B' + name + '|' + race + '|' + col;
   let s = sprCache.get(key);
   if (!s) { s = makeSprite(BSPR[name], Object.assign({ F: col }, BCOMMON, BPAL[race] || BPAL[0])); sprCache.set(key, s); }
   return s;
 }
-let farmSpr = null, flameSpr = null;
+let farmSpr = null, flameSpr = null, _site = null;
+function siteSpr() { return _site || (_site = makeSprite(BSPR.site, BCOMMON)); }
+const TOOLCOL = { 1: '#b8bcc8', 2: '#8a8a92', 3: '#8a8a92', 4: '#8a8a92', 5: '#d8344a', 6: '#e8c64a', 7: '#e8e8e8', 9: '#c9a06a' };
 function buildMiscSprites() {
   farmSpr = [];
   const soil = ['#8a6238', '#7a5530'], crop = [null, '#6fbf4a', '#4f9f38', '#e8c64a'];
@@ -298,9 +339,24 @@ function render(dt, paused) {
     const sx = w2sx(b.x * TS), sy = w2sy(b.y * TS);
     if (b.type === B_FARM && b.built) { ctx.drawImage(farmSpr[b.grow >= 100 ? 3 : b.grow >= 60 ? 2 : b.grow >= 25 ? 1 : 0], sx, sy, ts, ts); continue; }
     const v = G.villages.get(b.vid), kd = v ? G.kingdoms.get(v.kid) : null, s = bldSprite(b, v, kd);
-    ctx.drawImage(s, sx + (TS - s.width) / 2 * z, sy + (TS - s.height) * z, s.width * z, s.height * z);
-    if (b.built && b.hp < b.mhp * .6 && z >= 2) { ctx.fillStyle = 'rgba(30,20,10,.45)'; ctx.fillRect(sx + z, sy + z * 2, z * 2, z); ctx.fillRect(sx + z * 4, sy + z * 4, z * 2, z); }
+    const bx = sx + (TS - s.width) / 2 * z, by = sy + (TS - s.height) * z;
+    if (!b.built) { // the building rises from the ground inside its scaffold
+      const f = clamp(b.prog / 100, 0, 1), hh = Math.max(1, Math.round(s.height * (.25 + f * .6)));
+      ctx.globalAlpha = .9; ctx.drawImage(s, 0, s.height - hh, s.width, hh, bx, by + (s.height - hh) * z, s.width * z, hh * z); ctx.globalAlpha = 1;
+      ctx.drawImage(siteSpr(), sx, sy, ts, ts);
+      continue;
+    }
+    ctx.drawImage(s, bx, by, s.width * z, s.height * z);
+    if (z >= 1.5) {
+      if (b.type === B_HALL && kd) { ctx.fillStyle = KCOLORS[kd.color]; ctx.fillRect(bx + 8 * z, by + (((fr >> 4) + b.id) & 1) * z, z, z); } // fluttering banner
+      else if (b.type === B_SMITHY && ((fr >> 3) + b.id) % 3 === 0) { ctx.fillStyle = '#ffe14a'; ctx.fillRect(bx + 2 * z, by + 5 * z, z, z); }
+      else if (b.type === B_SAWMILL && !paused) { ctx.fillStyle = '#d8dce6'; ctx.fillRect(bx + (5 + ((fr >> 3) & 1)) * z, by + 5 * z, z, z * .5); }
+      if (!paused && z >= 2 && (b.type === B_SMITHY || (b.type === B_HOUSE && b.lvl >= 1)) && (fr + b.id * 13) % 46 === 0) fxPart(b.x + .72, b.y - .1, rr(-.004, .006), -.014, 70, '#c8c8cc', 1);
+    }
+    if (b.hp < b.mhp * .6 && z >= 2) { ctx.fillStyle = 'rgba(30,20,10,.45)'; ctx.fillRect(sx + z, sy + z * 2, z * 2, z); ctx.fillRect(sx + z * 4, sy + z * 4, z * 2, z); }
   }
+  // sleepers
+  if (z >= 2 && RD.sleep) { ctx.fillStyle = '#fff'; ctx.font = '700 ' + Math.round(4 * z) + 'px system-ui'; ctx.textAlign = 'left'; for (const sl of RD.sleep) { const b = { x: sl.x - .5, y: sl.y - .5 }; const ph = (fr >> 4) % 3; ctx.globalAlpha = .9 - ph * .25; ctx.fillText('z', w2sx((b.x + .9) * TS) + ph * z, w2sy(b.y * TS) - ph * 2 * z); } ctx.globalAlpha = 1; }
   // fire
   const fs = G.fires;
   for (let n = 0; n < fs.length; n++) {
@@ -312,10 +368,12 @@ function render(dt, paused) {
   const us = G.units, sprites = z >= 1.15, walkPh = (fr / 9) | 0, terr = G.terr;
   const ux0 = tx0 - 1, ux1 = tx1 + 2, uy0 = ty0 - 1, uy1 = ty1 + 2;
   let sel = null;
+  const sleep = RD.sleep || (RD.sleep = []); sleep.length = 0;
   for (let n = 0; n < us.length; n++) {
     const u = us[n];
     if (u.x < ux0 || u.x > ux1 || u.y < uy0 || u.y > uy1) continue;
     if (u.id === RD.selId) sel = u;
+    if (u.tk === TK_REST && u.st === ST_WORK) { if (sleep.length < 60) sleep.push(u); continue; } // asleep indoors
     const k = KIND[u.kind], px = w2sx((u.x + u.ox) * TS), py = w2sy((u.y + u.oy) * TS);
     if (!sprites) {
       const kd = u.kid ? G.kingdoms.get(u.kid) : null;
@@ -326,7 +384,7 @@ function render(dt, paused) {
     const tt = terr[(u.y | 0) * W + (u.x | 0)], boat = k.civ && WATER[tt] === 1;
     const moving = u.path || k.fly;
     const s = unitSprite(u, moving && !paused ? (walkPh + u.id) & 1 : 0, u.dir < 0, boat);
-    let sc = z; if (k.civ && !boat && u.age < k.mature * YEAR) sc = z * .72; else if (u.hero) sc = z * 1.2;
+    let sc = z; if (k.civ && !boat && u.age < k.mature * YEAR) sc = z * .72; else if (k.animal && u.age < 1.5 * YEAR) sc = z * .68; else if (u.hero) sc = z * 1.2;
     let yo = 0;
     if (k.fly) { yo = -6 * z; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(px - 4 * z, py + 2 * z, 8 * z, 2 * z); }
     else if (u.st === ST_WORK && !paused) yo = ((fr / 7 + u.id) & 1) ? -z : 0;
@@ -334,10 +392,15 @@ function render(dt, paused) {
     const dw = s.width * sc, dh = s.height * sc, dx = px - dw / 2, dy = py - dh + 2 * z + yo;
     if (G.tick - u.hit < 4) { ctx.globalAlpha = .55; ctx.drawImage(s, dx, dy, dw, dh); ctx.globalAlpha = 1; }
     else ctx.drawImage(s, dx, dy, dw, dh);
+    if (k.civ && u.st === ST_WORK && z >= 1.8 && TOOLCOL[u.tk]) { // swinging a tool
+      const up = ((fr / 7 + u.id) & 1), d = u.dir < 0 ? -1 : 1, hx = px + d * 3 * z, hy = dy + (up ? 0 : 2) * z;
+      ctx.fillStyle = '#6b4a2a'; ctx.fillRect(hx - z * .5, hy + z, z, z * 3);
+      ctx.fillStyle = TOOLCOL[u.tk]; ctx.fillRect(hx - z * (d > 0 ? .5 : 1.5), hy, z * 2, z);
+    } else if (u.tk === TK_EAT && u.st === ST_WORK && z >= 1.8) { ctx.fillStyle = '#e8a86a'; ctx.fillRect(px + (u.dir < 0 ? -3 : 2) * z, dy + 2 * z, z, z); }
     if (u.sick > 0) { ctx.fillStyle = '#7fe04a'; ctx.fillRect(px - z, dy - z * 2, z * 2, z * 2); }
     else if (u.hero) { ctx.fillStyle = '#ffd23c'; ctx.fillRect(px - z * .5, dy - z * 2, z, z); }
     else if (u.bless > 0 && (fr + u.id) % 20 < 10) { ctx.fillStyle = '#fff7b0'; ctx.fillRect(px + z * 2, dy, z, z); }
-    if (u.ca > 0 && z >= 2 && !boat) { ctx.fillStyle = ['#d86a4a', '#8a5a30', '#aaa', '#56729e', '#f7c62f'][u.cr]; ctx.fillRect(px - z * 3.5 * (u.dir < 0 ? -1 : 1) - z, dy + z * 2, z * 2, z * 2); }
+    if (u.ca > 0 && z >= 2 && !boat) { ctx.fillStyle = ['#d86a4a', '#8a5a30', '#aaa', '#b5543a', '#f7c62f', '#e07a2c', '#222', '#4fe3e8'][u.cr]; ctx.fillRect(px - z * 3.5 * (u.dir < 0 ? -1 : 1) - z, dy + z * 2, z * 2, z * 2); }
     if (z >= 2.6 && u.hp < u.mhp * .9) { const bw = 8 * z; ctx.fillStyle = '#000a'; ctx.fillRect(px - bw / 2, dy - z * 2.5, bw, z * 1.2); ctx.fillStyle = u.hp > u.mhp * .5 ? '#5bd24a' : u.hp > u.mhp * .25 ? '#f2c230' : '#e6483f'; ctx.fillRect(px - bw / 2, dy - z * 2.5, bw * Math.max(0, u.hp / u.mhp), z * 1.2); }
   }
   if (sel) {

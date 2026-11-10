@@ -4,7 +4,7 @@ function b64enc(u8) { let s = ''; for (let i = 0; i < u8.length; i += 8192) s +=
 function b64dec(str) { const s = atob(str), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
 function rleEnc(a) { const out = []; let i = 0; const n = a.length; while (i < n) { const v = a[i]; let c = 1; while (i + c < n && a[i + c] === v && c < 255) c++; out.push(c, v); i += c; } return b64enc(Uint8Array.from(out)); }
 function rleDec(str, target) { const d = b64dec(str); let p = 0; for (let i = 0; i < d.length; i += 2) { const c = d[i], v = d[i + 1]; target.fill(v, p, p + c); p += c; } }
-const UF = ['id', 'kind', 'x', 'y', 'hp', 'mhp', 'age', 'life', 'dir', 'st', 'role', 'vid', 'kid', 'tk', 'tt', 'tid', 'cr', 'ca', 'wt', 'name', 'sex', 'kills', 'kids', 'hg', 'sick', 'imm', 'hero', 'bless', 'guard', 'rest', 'nom'];
+const UF = ['id', 'kind', 'x', 'y', 'hp', 'mhp', 'age', 'life', 'dir', 'st', 'role', 'vid', 'kid', 'tk', 'tt', 'tid', 'cr', 'ca', 'wt', 'name', 'sex', 'kills', 'kids', 'hg', 'sick', 'imm', 'hero', 'bless', 'guard', 'rest', 'nom', 'ate', 'slept', 'fast', 'home', 'job', 'hair'];
 function serializeWorld() {
   const r2 = v => typeof v === 'number' && v % 1 ? Math.round(v * 100) / 100 : v;
   return JSON.stringify({
@@ -27,7 +27,8 @@ function deserializeWorld(json) {
   for (let i = 0; i < G.terr.length; i++) { if (G.fire[i]) G.fires.push(i); if (G.terr[i] === T_LAVA) G.lavas.push(i); }
   for (const a of d.units) {
     const u = {}; UF.forEach((f, i) => u[f] = a[i]);
-    u.path = null; u.mode = 0; u.next = G.tick + 1 + ri(12); u.hit = -99; u.ox = rr(-.28, .28); u.oy = rr(-.28, .28);
+    if (u.ate == null) { u.ate = G.tick - ri(200); u.slept = G.tick - ri(900); u.fast = 0; u.home = 0; u.job = -1; u.hair = ri(4); }
+    u.jf = 0; u.path = null; u.mode = 0; u.next = G.tick + 1 + ri(12); u.hit = -99; u.ox = rr(-.28, .28); u.oy = rr(-.28, .28);
     G.units.push(u); G.unitById.set(u.id, u);
   }
   for (const b of d.blds) { G.blds.set(b.id, b); G.bldAt[b.y * G.W + b.x] = b.id; }

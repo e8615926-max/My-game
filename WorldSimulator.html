@@ -206,27 +206,50 @@ const FLAM = [0, 0, 0, 0, .018, .13, 0, 0, .07, .008, 0, 0, 0, 0];
 const FERT = [0, 0, 0, .25, 1, .9, .2, .25, .45, .5, 0, 0, 0, .4];
 
 /* ----- Tile features (resources) ----- */
-const F_NONE = 0, F_BERRY = 1, F_STONE = 2, F_ORE = 3, F_GOLD = 4;
+const F_NONE = 0, F_BERRY = 1, F_STONE = 2, F_ORE = 3, F_GOLD = 4, F_COPPER = 5, F_COAL = 6, F_GEM = 7;
+const FEAT_RES = [-1, -1, 2, 3, 4, 5, 6, 7];     // feature → resource
+const RES_FEAT = [0, 0, 2, 3, 4, 5, 6, 7];       // resource → feature
+const FEAT_YIELD = [0, 0, 4, 3, 2, 3, 3, 1];
+const FEAT_AMT = [0, 3, 30, 20, 12, 20, 24, 8];
 
 /* ----- Resources ----- */
-const R_FOOD = 0, R_WOOD = 1, R_STONE = 2, R_ORE = 3, R_GOLD = 4;
-const RES_KEYS = ['food', 'wood', 'stone', 'ore', 'gold'];
-const RES_ICON = ['🍖', '🪵', '🪨', '⛏️', '🪙'];
+const R_FOOD = 0, R_WOOD = 1, R_STONE = 2, R_ORE = 3, R_GOLD = 4, R_COPPER = 5, R_COAL = 6, R_GEM = 7, NRES = 8;
+const RES_KEYS = ['food', 'wood', 'stone', 'ore', 'gold', 'copper', 'coal', 'gem'];
+const RES_ICON = ['🍖', '🪵', '🪨', '⛓️', '🪙', '🟠', '⚫', '💎'];
 
 /* ----- Creature kinds ----- */
-const K_HUMAN = 0, K_ELF = 1, K_ORC = 2, K_DWARF = 3, K_SHEEP = 4, K_RABBIT = 5, K_WOLF = 6, K_BEAR = 7, K_SKEL = 8, K_DRAGON = 9;
+const K_HUMAN = 0, K_ELF = 1, K_ORC = 2, K_DWARF = 3, K_SHEEP = 4, K_RABBIT = 5, K_WOLF = 6, K_BEAR = 7, K_SKEL = 8, K_DRAGON = 9, K_DEER = 10, K_COW = 11, K_FOX = 12, K_BOAR = 13;
 const KIND = [
   { key: 'human', civ: 1, hp: 100, dmg: 10, spd: .055, life: [60, 80], mature: 14, fert: 1.0, range: 1.3, aggr: .35, icon: '🧑' },
   { key: 'elf', civ: 1, hp: 80, dmg: 9, spd: .065, life: [130, 190], mature: 18, fert: .55, range: 5, aggr: .15, icon: '🧝' },
   { key: 'orc', civ: 1, hp: 130, dmg: 14, spd: .055, life: [40, 56], mature: 10, fert: 1.4, range: 1.3, aggr: .6, icon: '👹' },
   { key: 'dwarf', civ: 1, hp: 140, dmg: 12, spd: .05, life: [90, 130], mature: 15, fert: .95, range: 1.3, aggr: .3, icon: '🧔' },
-  { key: 'sheep', animal: 1, prey: 1, hp: 30, dmg: 0, spd: .03, life: [10, 16], food: 8, range: 1, icon: '🐑' },
-  { key: 'rabbit', animal: 1, prey: 1, hp: 10, dmg: 0, spd: .07, life: [5, 9], food: 3, range: 1, icon: '🐇' },
-  { key: 'wolf', animal: 1, pred: 1, hp: 60, dmg: 9, spd: .07, life: [12, 18], food: 4, range: 1.3, icon: '🐺' },
-  { key: 'bear', animal: 1, pred: 1, hp: 170, dmg: 18, spd: .05, life: [20, 30], food: 10, range: 1.3, icon: '🐻' },
+  { key: 'sheep', animal: 1, prey: 1, herd: 1, breed: .035, cap: 130, hp: 30, dmg: 0, spd: .03, life: [10, 16], food: 8, range: 1, icon: '🐑' },
+  { key: 'rabbit', animal: 1, prey: 1, small: 1, breed: .05, cap: 190, hp: 10, dmg: 0, spd: .07, life: [5, 9], food: 3, range: 1, icon: '🐇' },
+  { key: 'wolf', animal: 1, pred: 1, herd: 1, cap: 800, hp: 60, dmg: 9, spd: .07, life: [12, 18], food: 4, range: 1.3, icon: '🐺' },
+  { key: 'bear', animal: 1, pred: 1, cap: 1700, hp: 170, dmg: 18, spd: .05, life: [20, 30], food: 10, range: 1.3, icon: '🐻' },
   { key: 'skeleton', monster: 1, hp: 70, dmg: 9, spd: .045, life: [12, 20], range: 1.3, icon: '💀' },
-  { key: 'dragon', monster: 1, fly: 1, hp: 900, dmg: 45, spd: .1, life: [250, 400], range: 2.5, icon: '🐉' }
+  { key: 'dragon', monster: 1, fly: 1, hp: 900, dmg: 45, spd: .1, life: [250, 400], range: 2.5, icon: '🐉' },
+  { key: 'deer', animal: 1, prey: 1, herd: 1, breed: .03, cap: 260, hp: 35, dmg: 0, spd: .075, life: [12, 18], food: 9, range: 1, icon: '🦌' },
+  { key: 'cow', animal: 1, prey: 1, herd: 1, breed: .028, cap: 320, hp: 70, dmg: 0, spd: .028, life: [14, 20], food: 14, range: 1, icon: '🐄' },
+  { key: 'fox', animal: 1, pred: 1, small: 1, cap: 900, hp: 28, dmg: 5, spd: .075, life: [8, 13], food: 2, range: 1.3, icon: '🦊' },
+  { key: 'boar', animal: 1, tough: 1, breed: .03, cap: 600, hp: 80, dmg: 11, spd: .055, life: [10, 16], food: 10, range: 1.3, icon: '🐗' }
 ];
+const ANIMAL_KINDS = [K_SHEEP, K_RABBIT, K_DEER, K_COW, K_BOAR, K_FOX, K_WOLF, K_BEAR];
+/** Where each animal likes to live. */
+function habitatOK(kind, t) {
+  switch (kind) {
+    case K_SHEEP: case K_RABBIT: case K_COW: return t === T_GRASS;
+    case K_DEER: case K_BOAR: return t === T_FOREST || t === T_GRASS;
+    case K_FOX: return t === T_FOREST || t === T_GRASS || t === T_TAIGA;
+    case K_WOLF: return t === T_FOREST || t === T_TAIGA || t === T_SNOW;
+    case K_BEAR: return t === T_FOREST || t === T_TAIGA || t === T_HILL;
+  }
+  return WALK[t] === 1;
+}
+/* ----- Professions ----- */
+const JOB_FARMER = 0, JOB_HUNTER = 1, JOB_LUMBER = 2, JOB_MINER = 3, JOB_BUILDER = 4;
+const JOB_KEYS = ['farmer', 'hunter', 'lumber', 'miner', 'builder'];
 // race affinity matrix (base opinion between civilised races)
 const RACE_AFF = [
   [25, 5, -15, 10],
@@ -240,11 +263,11 @@ const RL_WORKER = 0, RL_SOLDIER = 1, RL_KING = 2, RL_SETTLER = 3, RL_TRADER = 4;
 const ROLE_KEYS = ['worker', 'soldier', 'king', 'settler', 'trader'];
 const ST_IDLE = 0, ST_GO = 1, ST_WORK = 2, ST_RETURN = 3, ST_FIGHT = 4, ST_FLEE = 5, ST_WANDER = 6, ST_HUNT = 7;
 const TK_NONE = 0, TK_CHOP = 1, TK_STONE = 2, TK_ORE = 3, TK_GOLD = 4, TK_BERRY = 5, TK_FARM = 6, TK_FISH = 7,
-  TK_HUNT = 8, TK_BUILD = 9, TK_SETTLE = 10, TK_TRADE = 11;
-const TASK_KEYS = ['none', 'chop', 'stone', 'ore', 'gold', 'berry', 'farm', 'fish', 'hunt', 'build', 'settle', 'trade'];
+  TK_HUNT = 8, TK_BUILD = 9, TK_SETTLE = 10, TK_TRADE = 11, TK_EAT = 12, TK_REST = 13;
+const TASK_KEYS = ['none', 'chop', 'stone', 'ore', 'gold', 'berry', 'farm', 'fish', 'hunt', 'build', 'settle', 'trade', 'eat', 'rest'];
 
 /* ----- Buildings ----- */
-const B_HALL = 0, B_HOUSE = 1, B_FARM = 2, B_BARRACKS = 3, B_MARKET = 4, B_TOWER = 5, B_TEMPLE = 6, B_SMITHY = 7;
+const B_HALL = 0, B_HOUSE = 1, B_FARM = 2, B_BARRACKS = 3, B_MARKET = 4, B_TOWER = 5, B_TEMPLE = 6, B_SMITHY = 7, B_MINE = 8, B_SAWMILL = 9, B_DOCK = 10;
 const BLD = [
   { key: 'hall', hp: 400, cost: [0, 0, 0, 0, 0] },
   { key: 'house', hp: 120, cost: [0, 8, 0, 0, 0] },
@@ -253,7 +276,10 @@ const BLD = [
   { key: 'market', hp: 160, cost: [0, 20, 10, 0, 0] },
   { key: 'tower', hp: 260, cost: [0, 5, 18, 0, 0] },
   { key: 'temple', hp: 240, cost: [0, 15, 30, 0, 8] },
-  { key: 'smithy', hp: 180, cost: [0, 10, 15, 6, 0] }
+  { key: 'smithy', hp: 180, cost: [0, 10, 15, 6, 0] },
+  { key: 'mine', hp: 200, cost: [0, 12, 6, 0, 0] },
+  { key: 'sawmill', hp: 140, cost: [0, 14, 0, 0, 0] },
+  { key: 'dock', hp: 140, cost: [0, 12, 0, 0, 0] }
 ];
 
 const KCOLORS = ['#e6483f', '#3f7fe6', '#f2c230', '#8e4fd6', '#2fb8a0', '#f08a2e', '#e66bb4', '#7ec83f',
@@ -289,7 +315,7 @@ const LANG = {
     'tool.hand': 'Осмотр', 'brush': 'Кисть', 'hint.hand': 'Двигайте карту. Нажмите на существо или поселение, чтобы осмотреть.',
     'p.erase': 'Бездна', 'p.water': 'Океан', 'p.shallow': 'Мелководье', 'p.sand': 'Песок', 'p.grass': 'Луга', 'p.forest': 'Лес', 'p.desert': 'Пустыня',
     'p.snow': 'Снег', 'p.taiga': 'Тайга', 'p.hill': 'Холмы', 'p.mount': 'Горы', 'p.peak': 'Пики', 'p.lava': 'Лава',
-    'p.rain': 'Дождь', 'p.seeds': 'Рост леса', 'p.bloom': 'Плодородие', 'p.berry': 'Ягоды', 'p.stone': 'Камень', 'p.ore': 'Руда', 'p.gold': 'Золото',
+    'p.rain': 'Дождь', 'p.seeds': 'Рост леса', 'p.bloom': 'Плодородие', 'p.berry': 'Ягоды', 'p.stone': 'Камень', 'p.ore': 'Железо', 'p.gold': 'Золото', 'p.copper': 'Медь', 'p.coal': 'Уголь', 'p.gem': 'Самоцветы', 'p.deer': 'Олени', 'p.cow': 'Коровы', 'p.fox': 'Лисы', 'p.boar': 'Кабаны',
     'p.human': 'Люди', 'p.elf': 'Эльфы', 'p.orc': 'Орки', 'p.dwarf': 'Гномы', 'p.sheep': 'Овцы', 'p.rabbit': 'Кролики', 'p.wolf': 'Волки', 'p.bear': 'Медведи', 'p.skeleton': 'Скелеты', 'p.dragon': 'Дракон',
     'p.lightning': 'Молния', 'p.fire': 'Огонь', 'p.meteor': 'Метеорит', 'p.shower': 'Метеоритный дождь', 'p.quake': 'Землетрясение', 'p.tornado': 'Торнадо', 'p.volcano': 'Вулкан', 'p.bomb': 'Взрыв', 'p.plague': 'Чума',
     'p.bless': 'Благословение', 'p.reaper': 'Жнец', 'p.gift': 'Дар ресурсов', 'p.peace': 'Голубь мира', 'p.war': 'Рог войны', 'p.hero': 'Избранный', 'p.demolish': 'Разрушение', 'p.storm': 'Гроза',
@@ -299,15 +325,15 @@ const LANG = {
     'd.reaper': 'Забирает жизни в области кисти', 'd.demolish': 'Сносит постройки', 'd.plague': 'Заражает существ болезнью', 'd.spawn': 'Нажмите или ведите по карте, чтобы создавать',
     'd.paint': 'Ведите по карте, чтобы рисовать', 'd.tap': 'Нажмите на карту',
     'races.human': 'Люди', 'races.elf': 'Эльфы', 'races.orc': 'Орки', 'races.dwarf': 'Гномы',
-    'kind.human': 'Человек', 'kind.elf': 'Эльф', 'kind.orc': 'Орк', 'kind.dwarf': 'Гном', 'kind.sheep': 'Овца', 'kind.rabbit': 'Кролик', 'kind.wolf': 'Волк', 'kind.bear': 'Медведь', 'kind.skeleton': 'Скелет', 'kind.dragon': 'Дракон',
+    'kind.human': 'Человек', 'kind.elf': 'Эльф', 'kind.orc': 'Орк', 'kind.dwarf': 'Гном', 'kind.sheep': 'Овца', 'kind.rabbit': 'Кролик', 'kind.wolf': 'Волк', 'kind.bear': 'Медведь', 'kind.skeleton': 'Скелет', 'kind.dragon': 'Дракон', 'kind.deer': 'Олень', 'kind.cow': 'Корова', 'kind.fox': 'Лиса', 'kind.boar': 'Кабан',
     'role.worker': 'Работник', 'role.soldier': 'Воин', 'role.king': 'Правитель', 'role.settler': 'Поселенец', 'role.trader': 'Торговец', 'role.child': 'Ребёнок', 'role.nomad': 'Кочевник',
-    'task.none': 'Отдыхает', 'task.chop': 'Рубит лес', 'task.stone': 'Добывает камень', 'task.ore': 'Добывает руду', 'task.gold': 'Добывает золото', 'task.berry': 'Собирает ягоды', 'task.farm': 'Собирает урожай',
+    'task.none': 'Отдыхает', 'task.chop': 'Рубит лес', 'task.stone': 'Добывает камень', 'task.ore': 'Добывает руду', 'task.eat': 'Ест', 'task.rest': 'Спит дома', 'job.farmer': 'Земледелец', 'job.hunter': 'Охотник и рыбак', 'job.lumber': 'Лесоруб', 'job.miner': 'Рудокоп', 'job.builder': 'Строитель', 'task.gold': 'Добывает золото', 'task.berry': 'Собирает ягоды', 'task.farm': 'Собирает урожай',
     'task.fish': 'Ловит рыбу', 'task.hunt': 'Охотится', 'task.build': 'Строит', 'task.settle': 'Ищет новый дом', 'task.trade': 'Везёт товары', 'task.fight': 'Сражается', 'task.flee': 'Спасается',
     'task.return': 'Несёт добычу домой', 'task.wander': 'Гуляет', 'task.patrol': 'Патрулирует', 'task.march': 'Идёт в поход', 'task.sail': 'Плывёт на лодке', 'task.rest': 'Спит', 'task.fly': 'Летит',
     'vlvl.0': 'Хутор', 'vlvl.1': 'Деревня', 'vlvl.2': 'Город', 'vlvl.3': 'Столица края',
     'title.tribe': 'Племя', 'title.kingdom': 'Королевство', 'title.empire': 'Империя',
-    'bld.hall': 'Ратуша', 'bld.house': 'Дома', 'bld.farm': 'Фермы', 'bld.barracks': 'Казармы', 'bld.market': 'Рынок', 'bld.tower': 'Башни', 'bld.temple': 'Храм', 'bld.smithy': 'Кузница',
-    'res.food': 'Еда', 'res.wood': 'Дерево', 'res.stone': 'Камень', 'res.ore': 'Руда', 'res.gold': 'Золото',
+    'bld.hall': 'Ратуша', 'bld.house': 'Дома', 'bld.farm': 'Фермы', 'bld.barracks': 'Казармы', 'bld.market': 'Рынок', 'bld.tower': 'Башни', 'bld.temple': 'Храм', 'bld.smithy': 'Кузница', 'bld.mine': 'Шахта', 'bld.sawmill': 'Лесопилка', 'bld.dock': 'Причал',
+    'res.food': 'Еда', 'res.wood': 'Дерево', 'res.stone': 'Камень', 'res.ore': 'Железо', 'res.gold': 'Золото', 'res.copper': 'Медь', 'res.coal': 'Уголь', 'res.gem': 'Самоцветы', 'ui.hunger': 'Сытость', 'ui.energy': 'Бодрость', 'ui.job': 'Ремесло', 'ui.arms': 'Оружие', 'ui.tools': 'Инструменты', 'ui.goods': 'Изделия', 'ui.sex.0': '♂', 'ui.sex.1': '♀',
     'ui.age': 'Возраст', 'ui.years': '{0} л.', 'ui.health': 'Здоровье', 'ui.role': 'Роль', 'ui.doing': 'Занятие', 'ui.home': 'Дом', 'ui.kills': 'Побед', 'ui.kids': 'Детей', 'ui.follow': 'Следить', 'ui.unfollow': 'Не следить',
     'ui.hero': 'Герой', 'ui.sick': 'Болен', 'ui.blessed': 'Благословлён', 'ui.carry': 'Несёт', 'ui.none': 'нет', 'ui.ruler': 'Правитель', 'ui.capital': 'Столица', 'ui.race': 'Народ', 'ui.army': 'Войско',
     'ui.villages': 'Поселения', 'ui.founded': 'Основано', 'ui.relations': 'Отношения', 'ui.war': 'Война', 'ui.peace': 'Мир', 'ui.ally': 'Союз', 'ui.trade': 'торговля', 'ui.resources': 'Запасы', 'ui.buildings': 'Постройки',
@@ -327,7 +353,7 @@ const LANG = {
     'ev.trade': '{0} и {1} открыли торговлю', 'ev.capture': '{0} захватывает {1} у {2}', 'ev.fall': 'Королевство {0} исчезло', 'ev.conquered': 'Королевство {0} покорено: победитель — {1}', 'ev.ruin': 'Поселение {0} опустело',
     'ev.rebel': '{0} восстаёт против {2}: провозглашено {1}', 'ev.grow': '{0} разрастается: теперь это {1}', 'ev.famine': 'Голод в {0}', 'ev.plague': 'Чума в {0}', 'ev.harvest': 'Богатый урожай в {0}',
     'ev.hero': '{0} из {1} становится героем', 'ev.raid': 'Нежить напала на {0}', 'ev.dragon': 'Пробудился дракон', 'ev.dragonslain': '{0} сражает дракона!', 'ev.storm': 'Началась гроза', 'ev.meteor': 'С неба падает метеорит',
-    'ev.quake': 'Землетрясение!', 'ev.volcano': 'Извержение вулкана!', 'ev.herd': 'Стада вернулись на луга', 'ev.attack': 'Войско из {0} выступило на {1}', 'ev.newworld': 'Сотворён мир {0}'
+    'ev.quake': 'Землетрясение!', 'ev.volcano': 'Извержение вулкана!', 'ev.herd': 'Стада вернулись: {0}', 'ev.attack': 'Войско из {0} выступило на {1}', 'ev.newworld': 'Сотворён мир {0}'
   },
   en: {
     'app.title': 'World Simulator', 'year': 'Year {0}', 'pop': 'Population', 'kingdoms': 'Kingdoms', 'history': 'History', 'menu': 'Menu',
@@ -336,7 +362,7 @@ const LANG = {
     'tool.hand': 'Inspect', 'brush': 'Brush', 'hint.hand': 'Drag to move. Tap a creature or settlement to inspect it.',
     'p.erase': 'Abyss', 'p.water': 'Ocean', 'p.shallow': 'Shallows', 'p.sand': 'Sand', 'p.grass': 'Grassland', 'p.forest': 'Forest', 'p.desert': 'Desert',
     'p.snow': 'Snow', 'p.taiga': 'Taiga', 'p.hill': 'Hills', 'p.mount': 'Mountains', 'p.peak': 'Peaks', 'p.lava': 'Lava',
-    'p.rain': 'Rain', 'p.seeds': 'Forest growth', 'p.bloom': 'Fertility', 'p.berry': 'Berries', 'p.stone': 'Stone', 'p.ore': 'Ore', 'p.gold': 'Gold',
+    'p.rain': 'Rain', 'p.seeds': 'Forest growth', 'p.bloom': 'Fertility', 'p.berry': 'Berries', 'p.stone': 'Stone', 'p.ore': 'Iron', 'p.gold': 'Gold', 'p.copper': 'Copper', 'p.coal': 'Coal', 'p.gem': 'Gems', 'p.deer': 'Deer', 'p.cow': 'Cows', 'p.fox': 'Foxes', 'p.boar': 'Boars',
     'p.human': 'Humans', 'p.elf': 'Elves', 'p.orc': 'Orcs', 'p.dwarf': 'Dwarves', 'p.sheep': 'Sheep', 'p.rabbit': 'Rabbits', 'p.wolf': 'Wolves', 'p.bear': 'Bears', 'p.skeleton': 'Skeletons', 'p.dragon': 'Dragon',
     'p.lightning': 'Lightning', 'p.fire': 'Fire', 'p.meteor': 'Meteor', 'p.shower': 'Meteor shower', 'p.quake': 'Earthquake', 'p.tornado': 'Tornado', 'p.volcano': 'Volcano', 'p.bomb': 'Explosion', 'p.plague': 'Plague',
     'p.bless': 'Blessing', 'p.reaper': 'Reaper', 'p.gift': 'Gift of resources', 'p.peace': 'Dove of peace', 'p.war': 'Horn of war', 'p.hero': 'Chosen one', 'p.demolish': 'Demolish', 'p.storm': 'Thunderstorm',
@@ -346,15 +372,15 @@ const LANG = {
     'd.reaper': 'Takes lives inside the brush', 'd.demolish': 'Tears down buildings', 'd.plague': 'Infects creatures with disease', 'd.spawn': 'Tap or drag on the map to create',
     'd.paint': 'Drag on the map to paint', 'd.tap': 'Tap the map',
     'races.human': 'Humans', 'races.elf': 'Elves', 'races.orc': 'Orcs', 'races.dwarf': 'Dwarves',
-    'kind.human': 'Human', 'kind.elf': 'Elf', 'kind.orc': 'Orc', 'kind.dwarf': 'Dwarf', 'kind.sheep': 'Sheep', 'kind.rabbit': 'Rabbit', 'kind.wolf': 'Wolf', 'kind.bear': 'Bear', 'kind.skeleton': 'Skeleton', 'kind.dragon': 'Dragon',
+    'kind.human': 'Human', 'kind.elf': 'Elf', 'kind.orc': 'Orc', 'kind.dwarf': 'Dwarf', 'kind.sheep': 'Sheep', 'kind.rabbit': 'Rabbit', 'kind.wolf': 'Wolf', 'kind.bear': 'Bear', 'kind.skeleton': 'Skeleton', 'kind.dragon': 'Dragon', 'kind.deer': 'Deer', 'kind.cow': 'Cow', 'kind.fox': 'Fox', 'kind.boar': 'Boar',
     'role.worker': 'Worker', 'role.soldier': 'Warrior', 'role.king': 'Ruler', 'role.settler': 'Settler', 'role.trader': 'Trader', 'role.child': 'Child', 'role.nomad': 'Nomad',
-    'task.none': 'Resting', 'task.chop': 'Chopping wood', 'task.stone': 'Mining stone', 'task.ore': 'Mining ore', 'task.gold': 'Mining gold', 'task.berry': 'Picking berries', 'task.farm': 'Harvesting',
+    'task.none': 'Resting', 'task.chop': 'Chopping wood', 'task.stone': 'Mining stone', 'task.ore': 'Mining ore', 'task.eat': 'Eating', 'task.rest': 'Sleeping at home', 'job.farmer': 'Farmer', 'job.hunter': 'Hunter & fisher', 'job.lumber': 'Lumberjack', 'job.miner': 'Miner', 'job.builder': 'Builder', 'task.gold': 'Mining gold', 'task.berry': 'Picking berries', 'task.farm': 'Harvesting',
     'task.fish': 'Fishing', 'task.hunt': 'Hunting', 'task.build': 'Building', 'task.settle': 'Seeking a new home', 'task.trade': 'Hauling goods', 'task.fight': 'Fighting', 'task.flee': 'Fleeing',
     'task.return': 'Carrying goods home', 'task.wander': 'Strolling', 'task.patrol': 'Patrolling', 'task.march': 'Marching to war', 'task.sail': 'Sailing', 'task.rest': 'Sleeping', 'task.fly': 'Flying',
     'vlvl.0': 'Hamlet', 'vlvl.1': 'Village', 'vlvl.2': 'Town', 'vlvl.3': 'City',
     'title.tribe': 'Tribe', 'title.kingdom': 'Kingdom', 'title.empire': 'Empire',
-    'bld.hall': 'Town hall', 'bld.house': 'Houses', 'bld.farm': 'Farms', 'bld.barracks': 'Barracks', 'bld.market': 'Market', 'bld.tower': 'Towers', 'bld.temple': 'Temple', 'bld.smithy': 'Smithy',
-    'res.food': 'Food', 'res.wood': 'Wood', 'res.stone': 'Stone', 'res.ore': 'Ore', 'res.gold': 'Gold',
+    'bld.hall': 'Town hall', 'bld.house': 'Houses', 'bld.farm': 'Farms', 'bld.barracks': 'Barracks', 'bld.market': 'Market', 'bld.tower': 'Towers', 'bld.temple': 'Temple', 'bld.smithy': 'Smithy', 'bld.mine': 'Mine', 'bld.sawmill': 'Sawmill', 'bld.dock': 'Dock',
+    'res.food': 'Food', 'res.wood': 'Wood', 'res.stone': 'Stone', 'res.ore': 'Iron', 'res.gold': 'Gold', 'res.copper': 'Copper', 'res.coal': 'Coal', 'res.gem': 'Gems', 'ui.hunger': 'Fullness', 'ui.energy': 'Energy', 'ui.job': 'Trade', 'ui.arms': 'Weapons', 'ui.tools': 'Tools', 'ui.goods': 'Goods', 'ui.sex.0': '♂', 'ui.sex.1': '♀',
     'ui.age': 'Age', 'ui.years': '{0} y', 'ui.health': 'Health', 'ui.role': 'Role', 'ui.doing': 'Activity', 'ui.home': 'Home', 'ui.kills': 'Kills', 'ui.kids': 'Children', 'ui.follow': 'Follow', 'ui.unfollow': 'Unfollow',
     'ui.hero': 'Hero', 'ui.sick': 'Sick', 'ui.blessed': 'Blessed', 'ui.carry': 'Carrying', 'ui.none': 'none', 'ui.ruler': 'Ruler', 'ui.capital': 'Capital', 'ui.race': 'People', 'ui.army': 'Army',
     'ui.villages': 'Settlements', 'ui.founded': 'Founded', 'ui.relations': 'Relations', 'ui.war': 'War', 'ui.peace': 'Peace', 'ui.ally': 'Alliance', 'ui.trade': 'trade', 'ui.resources': 'Stock', 'ui.buildings': 'Buildings',
@@ -374,7 +400,7 @@ const LANG = {
     'ev.trade': '{0} and {1} opened trade', 'ev.capture': '{0} captures {1} from {2}', 'ev.fall': 'The kingdom of {0} is no more', 'ev.conquered': 'The kingdom of {0} was conquered by {1}', 'ev.ruin': 'The settlement {0} was abandoned',
     'ev.rebel': '{0} rebels against {2}: {1} proclaimed', 'ev.grow': '{0} grows: it is now a {1}', 'ev.famine': 'Famine in {0}', 'ev.plague': 'Plague in {0}', 'ev.harvest': 'Bountiful harvest in {0}',
     'ev.hero': '{0} of {1} becomes a hero', 'ev.raid': 'The undead attack {0}', 'ev.dragon': 'A dragon has awakened', 'ev.dragonslain': '{0} slays the dragon!', 'ev.storm': 'A thunderstorm begins', 'ev.meteor': 'A meteor falls from the sky',
-    'ev.quake': 'Earthquake!', 'ev.volcano': 'A volcano erupts!', 'ev.herd': 'Herds return to the meadows', 'ev.attack': 'An army from {0} marches on {1}', 'ev.newworld': 'The world of {0} is created'
+    'ev.quake': 'Earthquake!', 'ev.volcano': 'A volcano erupts!', 'ev.herd': 'Herds return: {0}', 'ev.attack': 'An army from {0} marches on {1}', 'ev.newworld': 'The world of {0} is created'
   }
 };
 let LNG = 'ru';
@@ -391,7 +417,7 @@ function TE(e) { return T(e.k, ...(e.a || [])); }
 /* ===== World state, generation, tile operations, regions, pathfinding ===== */
 let G = null;
 
-const WORLD_SIZES = { small: [128, 96, 1200], medium: [192, 144, 2000], large: [256, 192, 3000], huge: [320, 240, 4000] };
+const WORLD_SIZES = { small: [160, 120, 1500], medium: [256, 192, 2600], large: [352, 264, 3800], huge: [448, 336, 5000] };
 
 function newState(W, H, seed, maxUnits) {
   const N = W * H;
@@ -524,9 +550,7 @@ function generateWorld(sizeKey, seed, populate) {
     const i = y * W + x, t = terr[i], h = hash2(x, y, seed + 500);
     if (t === T_FOREST || t === T_TAIGA) G.amt[i] = 4;
     else if (t === T_HILL) {
-      if (h < .10) { G.feat[i] = F_STONE; G.amt[i] = 30; }
-      else if (h < .14) { G.feat[i] = F_ORE; G.amt[i] = 20; }
-      else if (h < .155) { G.feat[i] = F_GOLD; G.amt[i] = 12; }
+      if (h < .09) { G.feat[i] = F_STONE; G.amt[i] = 30; }
     } else if (t === T_GRASS) {
       if (h < .022) { G.feat[i] = F_BERRY; G.amt[i] = 3; }
       else if (h < .034) { G.feat[i] = F_STONE; G.amt[i] = 30; }
@@ -534,6 +558,24 @@ function generateWorld(sizeKey, seed, populate) {
       if (h < .012) { G.feat[i] = F_STONE; G.amt[i] = 30; }
       else if (h < .017) { G.feat[i] = F_GOLD; G.amt[i] = 12; }
       else if (h < .024) { G.feat[i] = F_ORE; G.amt[i] = 20; }
+    }
+  }
+  // ore veins: copper, iron, coal, gold and gems cluster in the highlands
+  const veinTypes = [F_COPPER, F_COPPER, F_COPPER, F_ORE, F_ORE, F_ORE, F_COAL, F_COAL, F_COAL, F_GOLD, F_GEM];
+  const nv = Math.max(12, (N / 330) | 0);
+  for (let k = 0; k < nv; k++) {
+    let x = (r() * W) | 0, y = (r() * H) | 0, ok = false;
+    for (let tr = 0; tr < 40 && !ok; tr++) {
+      x = (r() * W) | 0; y = (r() * H) | 0; const t = terr[y * W + x];
+      ok = t === T_HILL || (tr > 25 && (t === T_GRASS || t === T_DESERT || t === T_SNOW) && el[y * W + x] > pSand);
+    }
+    if (!ok) continue;
+    const f = veinTypes[(r() * veinTypes.length) | 0], len = 3 + ((r() * 6) | 0);
+    for (let s = 0; s < len; s++) {
+      if (!inb(x, y)) break;
+      const i = y * W + x, t = terr[i];
+      if (WALK[t] && t !== T_FOREST && t !== T_TAIGA && t !== T_SAND) { G.feat[i] = f; G.amt[i] = FEAT_AMT[f]; }
+      x += ((r() * 3) | 0) - 1; y += ((r() * 3) | 0) - 1;
     }
   }
   computeRegions();
@@ -588,12 +630,16 @@ function seedLife(r) {
       u.vid = v.id; u.kid = v.kid;
     }
   }
-  const animals = [[K_SHEEP, N / 420], [K_RABBIT, N / 600], [K_WOLF, N / 2600], [K_BEAR, N / 5200]];
-  for (const [kind, cnt] of animals) for (let n = 0; n < cnt; n++) {
-    for (let tr = 0; tr < 12; tr++) {
-      const x = (r() * W) | 0, y = (r() * H) | 0, t = G.terr[y * W + x];
-      const ok = kind === K_BEAR ? (t === T_FOREST || t === T_TAIGA || t === T_HILL) : kind === K_WOLF ? (t === T_FOREST || t === T_TAIGA || t === T_SNOW || t === T_GRASS) : (t === T_GRASS);
-      if (ok) { const u = spawnUnit(kind, x + .5, y + .5); if (u) u.age = rr(0, KIND[kind].life[0] * .6) * YEAR; break; }
+  let land = 0; for (let i = 0; i < N; i++) if (WALK[G.terr[i]]) land++;
+  for (const kind of ANIMAL_KINDS) {
+    const cnt = land / KIND[kind].cap * (KIND[kind].pred ? .7 : .55);
+    for (let n = 0; n < cnt; n++) for (let tr = 0; tr < 12; tr++) {
+      const x = (r() * W) | 0, y = (r() * H) | 0;
+      if (habitatOK(kind, G.terr[y * W + x])) {
+        const g = KIND[kind].herd ? 2 + ((r() * 3) | 0) : 1; n += g - 1;
+        for (let m = 0; m < g; m++) { const u = spawnUnit(kind, x + .5 + (r() - .5) * 3, y + .5 + (r() - .5) * 3); if (u) u.age = rr(0, KIND[kind].life[0] * .6) * YEAR; }
+        break;
+      }
     }
   }
 }
@@ -761,6 +807,7 @@ function spawnUnit(kind, x, y) {
     dir: rnd() < .5 ? 1 : -1, st: ST_IDLE, role: RL_WORKER, vid: 0, kid: 0, tk: 0, tt: -1, tid: 0, cr: 0, ca: 0, wt: 0,
     next: G.tick + 1 + ri(20), path: null, mode: 0, name: k.civ ? unitName(kind) : '', sex: ri(2), kills: 0, kids: 0,
     hg: 0, sick: 0, imm: 0, hero: 0, bless: 0, guard: 0, rest: 0, nom: 0, hit: -99,
+    ate: G.tick - ri(200), slept: G.tick - ri(900), fast: 0, home: 0, job: -1, jf: 0, hair: ri(4),
     ox: rr(-.28, .28), oy: rr(-.28, .28)
   };
   G.units.push(u); G.unitById.set(u.id, u);
@@ -778,7 +825,7 @@ function hostile(u, o) {
   if (ku.monster) return true;
   if (ku.civ) {
     if (ko.civ) return u.kid !== 0 && o.kid !== 0 && u.kid !== o.kid && isWar(u.kid, o.kid);
-    if (ko.pred) return o.st === ST_FIGHT;
+    if (ko.pred || ko.tough) return o.st === ST_FIGHT && !ko.small;
   }
   return false;
 }
@@ -896,7 +943,7 @@ function onArrive(u) {
     default: u.st = ST_IDLE;
   }
 }
-const WORK_TIME = [0, 50, 60, 70, 80, 30, 40, 70, 0, 30, 1, 1];
+const WORK_TIME = [0, 50, 60, 70, 80, 30, 40, 70, 0, 30, 1, 1, 14, 90];
 function startWork(u) {
   const W = G.W;
   if (u.tt >= 0) {
@@ -910,6 +957,26 @@ function startWork(u) {
   if (u.tk === TK_TRADE) { doTrade(u); return; }
   if (u.tk === TK_BUILD) { const b = G.blds.get(u.tid); if (!b || b.built) { resetTask(u); return; } }
   u.st = ST_WORK; u.wt = WORK_TIME[u.tk] || 30;
+  if (u.tk < TK_BUILD) { const v = G.villages.get(u.vid); if (v && v.tools > 0) u.wt = Math.round(u.wt * .78); } // copper tools speed up gathering
+}
+/** A villager eats one meal from the settlement's stores. */
+function eatNow(u, v, amount) {
+  if (v.stock[0] >= amount) { v.stock[0] -= amount; u.ate = G.tick; u.fast = 0; return true; }
+  u.ate = G.tick - 230; u.fast++; v.miss = (v.miss || 0) + 1;
+  if (u.fast >= 3) damage(u, 14, null);
+  return false;
+}
+function goRest(u, v) {
+  let b = G.blds.get(u.home);
+  if (!b || !b.built || b.vid !== v.id || b.type !== B_HOUSE) {
+    b = null;
+    for (let n = 0; n < 6 && !b; n++) { const c = G.blds.get(pick(v.bids)); if (c && c.built && c.type === B_HOUSE) b = c; }
+    if (!b) b = G.blds.get(v.bids[0]);
+    if (!b) return false;
+    u.home = b.id;
+  }
+  setTask(u, TK_REST, b.y * G.W + b.x, b.id);
+  return goTask(u);
 }
 function finishWork(u) {
   const W = G.W, i = u.tt, k = KIND[u.kind];
@@ -929,18 +996,22 @@ function finishWork(u) {
     }
     case TK_CHOP:
       if (t === T_FOREST || t === T_TAIGA) {
-        res = R_WOOD; amt = 5;
+        res = R_WOOD; amt = v && v.has[B_SAWMILL] ? 7 : 5;
         if (u.kind !== K_ELF || rnd() < .5) { if (G.amt[i] > 1) G.amt[i]--; else setTerr(x, y, t === T_TAIGA ? T_SNOW : T_GRASS); }
       } break;
-    case TK_STONE:
-      if (f === F_STONE) { res = R_STONE; amt = u.kind === K_DWARF ? 6 : 4; if (--G.amt[i] <= 0) setFeat(x, y, 0, 0); }
-      else if (t === T_HILL) { res = R_STONE; amt = u.kind === K_DWARF ? 4 : 2; }
+    case TK_STONE: case TK_ORE: case TK_GOLD:
+      if (f >= F_STONE) {
+        res = FEAT_RES[f]; amt = FEAT_YIELD[f];
+        if (u.kind === K_DWARF) amt = Math.ceil(amt * 1.5);
+        if (v && v.has[B_MINE]) amt = Math.ceil(amt * 1.4);
+        if (--G.amt[i] <= 0) setFeat(x, y, 0, 0);
+      } else if (t === T_HILL && u.tk === TK_STONE) { res = R_STONE; amt = u.kind === K_DWARF ? 4 : 2; }
       break;
-    case TK_ORE: if (f === F_ORE) { res = R_ORE; amt = u.kind === K_DWARF ? 5 : 3; if (--G.amt[i] <= 0) setFeat(x, y, 0, 0); } break;
-    case TK_GOLD: if (f === F_GOLD) { res = R_GOLD; amt = u.kind === K_DWARF ? 3 : 2; if (--G.amt[i] <= 0) setFeat(x, y, 0, 0); } break;
+    case TK_EAT: if (v) eatNow(u, v, 1.9); break;
+    case TK_REST: u.slept = G.tick; u.hp = Math.min(u.mhp, u.hp + 25); break;
     case TK_BERRY: if (f === F_BERRY && G.amt[i] > 0) { res = R_FOOD; amt = u.kind === K_ELF ? 7 : 5; G.amt[i] = 0; markDirty(i); } break;
     case TK_FARM: { const b = G.blds.get(u.tid); if (b && b.grow >= 100) { b.grow = 0; res = R_FOOD; amt = Math.round(10 * Math.max(.6, FERT[t])); } break; }
-    case TK_FISH: res = R_FOOD; amt = u.kind === K_HUMAN ? 5 : 4; break;
+    case TK_FISH: res = R_FOOD; amt = (u.kind === K_HUMAN ? 5 : 4) + (v && v.has[B_DOCK] ? 3 : 0); break;
   }
   u.tk = 0; u.tt = -1; u.tid = 0; u.st = ST_IDLE; u.next = G.tick + 1;
   if (res >= 0) { u.cr = res; u.ca = amt; }
@@ -990,7 +1061,7 @@ function fight(u, en, k, d) {
     u.path = null;
     let dmg = k.dmg * (.7 + rnd() * .6);
     if (u.hero) dmg *= 2;
-    if (u.role === RL_SOLDIER || u.role === RL_KING) { dmg *= 1.35; const v = G.villages.get(u.vid); if (v && v.has[B_SMITHY]) dmg *= 1.25; }
+    if (u.role === RL_SOLDIER || u.role === RL_KING) { dmg *= 1.35; const v = G.villages.get(u.vid); if (v) dmg *= v.arms > 0 ? 1.35 : v.has[B_SMITHY] ? 1.1 : 1; }
     if (u.bless > 0) dmg *= 1.2;
     if (en.x > u.x) u.dir = 1; else u.dir = -1;
     if (k.range > 2) fxArrow(u.x, u.y - .3, en.x, en.y - .3, '#f4f0d0');
@@ -1013,6 +1084,7 @@ function thinkCiv(u, k, t) {
   if (!isAdult(u)) {
     if (WATER[t] && !u.path) { if (v) moveTo(u, v.x, v.y); else escapeTo(u); }
     else if (!u.path) { if (v) wander(u, v.x, v.y, 3); else wander(u, u.x | 0, u.y | 0, 3); }
+    if (v && tick - u.ate > 300) eatNow(u, v, 1);
     u.next = tick + 30 + ri(50);
     return;
   }
@@ -1038,6 +1110,15 @@ function thinkCiv(u, k, t) {
   if (u.ca > 0 || u.st === ST_RETURN) {
     if (Math.abs(u.x - v.x - .5) < 1.6 && Math.abs(u.y - v.y - .5) < 1.6) { deposit(u, v); }
     else { u.st = ST_RETURN; if (!moveTo(u, v.x, v.y)) u.next = tick + 4 + ri(6); return; }
+  }
+  // personal needs: hunger first, then sleep
+  if (tick - u.ate > 300) {
+    const away = Math.abs(u.x - v.x) + Math.abs(u.y - v.y) > 3;
+    if (!away || (u.role === RL_SOLDIER && v.atk && !u.guard)) eatNow(u, v, 1.9);
+    else if (u.role !== RL_SETTLER && u.role !== RL_TRADER) { setTask(u, TK_EAT, v.y * W + v.x, 0); if (goTask(u)) return; }
+  } else if (tick - u.slept > 1100 && u.role !== RL_SETTLER && u.role !== RL_TRADER && !(u.role === RL_SOLDIER && v.atk && !u.guard)) {
+    if (goRest(u, v)) return;
+    u.slept = tick - 900;
   }
   switch (u.role) {
     case RL_KING:
@@ -1074,38 +1155,66 @@ function goTask(u) {
   u.tk = 0; u.tt = -1; u.tid = 0; return false;
 }
 
+const JOB_RES = [[R_FOOD], [R_FOOD], [R_WOOD], [R_STONE, R_ORE, R_GOLD, R_COPPER, R_COAL, R_GEM], []];
+const _w = new Float32Array(NRES);
+/** How badly the settlement needs each resource right now. */
+function resWeights(v, dwarf) {
+  const s = v.stock, pop = v.pop, w = _w, fNeed = pop * 6 + 12, lim = 150 + pop * 12;
+  w[0] = s[0] < fNeed ? 3.2 * (1 - s[0] / fNeed) + .35 : .15;
+  w[1] = s[1] < 10 ? 2 : s[1] < 30 + pop * 1.5 ? 1 : .1;
+  w[2] = pop >= 7 ? (s[2] < 25 + pop ? .8 : .06) : .08;
+  w[3] = pop >= 14 ? (s[3] < 15 ? .4 : .03) : 0;
+  w[4] = pop >= 12 ? (s[4] < 40 ? .22 : .03) : 0;
+  w[5] = pop >= 8 ? (s[5] < 10 ? .4 : .03) : 0;
+  w[6] = pop >= 14 ? (s[6] < 10 ? .35 : .03) : 0;
+  w[7] = pop >= 18 ? .08 : 0;
+  if (dwarf) for (let r = 2; r < NRES; r++) w[r] *= 1.8;
+  if (s[0] > lim * 2) w[0] = 0;
+  for (let r = 1; r < NRES; r++) if (s[r] > (r === 1 || r === 2 ? lim : lim * .5)) w[r] = 0;
+  return w;
+}
+function pickRes(w, list) {
+  let tot = 0;
+  if (list) { for (const r of list) tot += w[r]; if (tot <= 0) return -1; let x = rnd() * tot; for (const r of list) if ((x -= w[r]) < 0) return r; return list[0]; }
+  for (let r = 0; r < NRES; r++) tot += w[r];
+  if (tot <= 0) return -1;
+  let x = rnd() * tot; for (let r = 0; r < NRES; r++) if ((x -= w[r]) < 0) return r;
+  return 0;
+}
+function assignJob(u, w) {
+  let mine = 0; for (let r = 2; r < NRES; r++) mine += w[r];
+  const jw = [w[0] * .72, w[0] * .28, w[1], mine, .28];
+  let tot = 0; for (const x of jw) tot += x;
+  let x = rnd() * tot; u.job = JOB_BUILDER;
+  for (let j = 0; j < 5; j++) if ((x -= jw[j]) < 0) { u.job = j; break; }
+  u.jf = 0;
+}
 function workerThink(u, v, k) {
-  const s = v.stock, pop = v.pop, W = G.W;
-  if (v.sites > 0 && rnd() < .7) {
+  const W = G.W, w = resWeights(v, u.kind === K_DWARF);
+  if (u.job == null || u.job < 0 || u.jf > 3 || rnd() < .015) assignJob(u, w);
+  if (v.sites > 0 && rnd() < (u.job === JOB_BUILDER ? 1 : .3)) {
     for (let n = v.bids.length - 1; n >= 0; n--) {
       const b = G.blds.get(v.bids[n]);
       if (b && !b.built && !G.fire[b.y * W + b.x]) { setTask(u, TK_BUILD, b.y * W + b.x, b.id); if (goTask(u)) return; break; }
     }
   }
-  const fNeed = pop * 6 + 12;
-  let wF = s[0] < fNeed ? 3.2 * (1 - s[0] / fNeed) + .35 : .15;
-  let wW = s[1] < 10 ? 2 : s[1] < 30 + pop * 1.5 ? 1 : .1;
-  let wS = pop >= 7 ? (s[2] < 25 + pop ? .8 : .06) : .08;
-  let wO = pop >= 16 ? (s[3] < 15 ? .4 : .03) : 0;
-  let wG = pop >= 12 ? (s[4] < 40 ? .22 : .03) : 0;
-  if (u.kind === K_DWARF) { wS *= 1.6; wO *= 2; wG *= 2; }
-  // full storehouses: nothing more to gather
-  const lim = 150 + pop * 12;
-  if (s[0] > lim * 2) wF = 0; if (s[1] > lim) wW = 0; if (s[2] > lim) wS = 0; if (s[3] > lim * .5) wO = 0; if (s[4] > lim) wG = 0;
-  if (wF + wW + wS + wO + wG <= 0) { wander(u, v.x, v.y, Math.min(v.radius, 6)); u.next = G.tick + 40 + ri(60); return; }
-  let r = rnd() * (wF + wW + wS + wO + wG), res;
-  if ((r -= wF) < 0) res = R_FOOD; else if ((r -= wW) < 0) res = R_WOOD; else if ((r -= wS) < 0) res = R_STONE; else if ((r -= wO) < 0) res = R_ORE; else res = R_GOLD;
-  if (findTask(u, v, res, 1) || findTask(u, v, res, 2.4) || (res === R_WOOD && findTask(u, v, res, 4.5))) return;
-  if (res !== R_FOOD && findTask(u, v, R_FOOD, 1)) return;
+  // most of the time a villager follows their trade; otherwise they help where needed
+  let res = rnd() < .75 ? pickRes(w, JOB_RES[u.job]) : -1, own = res >= 0;
+  if (res < 0) res = pickRes(w, null);
+  if (res < 0) { wander(u, v.x, v.y, Math.min(v.radius, 6)); u.next = G.tick + 40 + ri(60); return; }
+  const pref = own ? (u.job === JOB_HUNTER ? 2 : u.job === JOB_FARMER ? 1 : 0) : 0;
+  if (findTask(u, v, res, 1, pref) || findTask(u, v, res, 2.4, pref) || (res === R_WOOD && findTask(u, v, res, 4.5, 0))) { u.jf = 0; return; }
+  if (own) u.jf++;
+  if (res !== R_FOOD && findTask(u, v, R_FOOD, 1, 0)) return;
   wander(u, v.x, v.y, Math.min(v.radius, 6));
   u.next = G.tick + 20 + ri(30);
 }
 
-function findTask(u, v, res, scale) {
+function findTask(u, v, res, scale, pref) {
   const W = G.W, R = Math.round((v.radius + 7) * scale), ureg = G.region[(u.y | 0) * W + (u.x | 0)];
   let best = -1, bd = 1e9, bk = 0, bid = 0;
   if (res === R_FOOD) {
-    const fs = v.farmIds;
+    const fs = pref === 2 ? null : v.farmIds;
     if (fs) for (let n = 0; n < fs.length; n++) {
       const b = G.blds.get(fs[n]);
       if (b && b.built && b.grow >= 100 && b.res < G.tick) {
@@ -1114,9 +1223,9 @@ function findTask(u, v, res, scale) {
       }
     }
     if (best >= 0) { const b = G.blds.get(bid); b.res = G.tick + 500; setTask(u, TK_FARM, best, bid); if (goTask(u)) return true; b.res = 0; return false; }
-    if (rnd() < .25) { // hunt
-      let prey = null, pd = 100;
-      forUnitsNear(u.x, u.y, 9, (o, d2) => { if (KIND[o.kind].prey && d2 < pd) { pd = d2; prey = o; } });
+    if (pref !== 1 && rnd() < (pref === 2 ? 1 : .15)) { // hunt
+      let prey = null, pd = pref === 2 ? 200 : 100;
+      forUnitsNear(u.x, u.y, pref === 2 ? 14 : 9, (o, d2) => { const ko = KIND[o.kind]; if ((ko.prey || ko.tough) && d2 < pd) { pd = d2; prey = o; } });
       if (prey) { u.tk = TK_HUNT; u.tid = prey.id; u.st = ST_HUNT; u.wt = 0; u.next = G.tick + 1; return true; }
     }
   }
@@ -1135,8 +1244,7 @@ function findTask(u, v, res, scale) {
       }
     } else if (res === R_WOOD) { if (t === T_FOREST || t === T_TAIGA) tk = TK_CHOP; }
     else if (res === R_STONE) { if (f === F_STONE) tk = TK_STONE; else if (t === T_HILL && !f && n > 12 && !G.bldAt[i]) tk = TK_STONE; }
-    else if (res === R_ORE) { if (f === F_ORE) tk = TK_ORE; }
-    else if (f === F_GOLD) tk = TK_GOLD;
+    else if (f === RES_FEAT[res]) tk = res === R_GOLD ? TK_GOLD : TK_ORE;
     if (!tk || G.region[si] !== ureg || G.fire[si]) continue;
     const o = G.owner[si];
     if (o && o !== v.id) { const ov = G.villages.get(o); if (ov && ov.kid !== v.kid) continue; }
@@ -1144,7 +1252,7 @@ function findTask(u, v, res, scale) {
     if (d < bd) { bd = d; best = si; bk = tk; }
   }
   if (best < 0) { if (sp >= 0 && scale > 2) v.spot[res] = -1; return false; }
-  if (!v.spot) v.spot = [-1, -1, -1, -1, -1];
+  if (!v.spot || v.spot.length < NRES) v.spot = [-1, -1, -1, -1, -1, -1, -1, -1];
   if (bk !== TK_FISH || sp < 0) v.spot[res] = best;
   setTask(u, bk, best, 0);
   return goTask(u);
@@ -1195,19 +1303,9 @@ function thinkAnimal(u, k) {
   const tick = G.tick;
   u.next = tick + 24 + ri(30);
   const cnt = G.count ? G.count[u.kind] : 0, cap = G.caps ? G.caps[u.kind] : 50;
-  if (k.prey) {
-    let th = null;
-    forUnitsNear(u.x, u.y, 3.5, o => { const ko = KIND[o.kind]; if (ko.pred || ko.monster || (o.tk === TK_HUNT && o.tid === u.id)) th = o; });
-    if (th) { fleeFrom(u, th.x, th.y); u.next = tick + 12; return; }
-    if (u.age > 1.5 * YEAR && cnt < cap && rnd() < (u.kind === K_RABBIT ? .05 : .035)) {
-      let near = 0; forUnitsNear(u.x, u.y, 5, o => { if (o.kind === u.kind) near++; });
-      if (near < 7) spawnUnit(u.kind, u.x, u.y);
-    }
-    if (!u.path && rnd() < .6) wander(u, u.x | 0, u.y | 0, 4);
-    return;
-  }
-  u.hg++;
-  if (u.st === ST_FIGHT) {
+  const grown = u.age > 1.5 * YEAR;
+  // fighting (predators hunting, or anything that was attacked and fights back)
+  if (u.st === ST_FIGHT && !k.prey) {
     const o = G.unitById.get(u.tid);
     if (o && !o.dead && udist(u, o) < 11) {
       const d = udist(u, o);
@@ -1217,15 +1315,43 @@ function thinkAnimal(u, k) {
     }
     u.st = ST_IDLE; u.tid = 0;
   }
-  if (u.hg > 10) {
-    let prey = null, pd = 1e9;
-    const wantCiv = u.hg > 35 || (u.kind === K_BEAR && rnd() < .2);
-    forUnitsNear(u.x, u.y, 12, (o, d2) => { const ko = KIND[o.kind]; if ((ko.prey || (wantCiv && ko.civ)) && d2 < pd) { pd = d2; prey = o; } });
-    if (prey) { u.st = ST_FIGHT; u.tid = prey.id; u.next = tick + 2; return; }
+  if (k.pred) {
+    u.hg++;
+    if (u.hg > 10) {
+      let prey = null, pd = 1e9;
+      const wantCiv = !k.small && (u.hg > 35 || (u.kind === K_BEAR && rnd() < .2));
+      forUnitsNear(u.x, u.y, 12, (o, d2) => {
+        const ko = KIND[o.kind];
+        if (d2 < pd && ((ko.prey && (!k.small || ko.small)) || (wantCiv && ko.civ) || (u.kind === K_BEAR && ko.tough && u.hg > 25))) { pd = d2; prey = o; }
+      });
+      if (prey) { u.st = ST_FIGHT; u.tid = prey.id; u.next = tick + 2; return; }
+    }
+    if (u.hg > 150) { damage(u, 8, null); if (u.dead) return; }
+    if (u.hg < 70 && u.age > 3 * YEAR && cnt < cap && rnd() < .045) spawnUnit(u.kind, u.x, u.y);
+  } else {
+    if (k.prey) {
+      let th = null;
+      forUnitsNear(u.x, u.y, 3.8, o => { const ko = KIND[o.kind]; if ((ko.pred && (!ko.small || k.small)) || ko.monster || (o.tk === TK_HUNT && o.tid === u.id)) th = o; });
+      if (th) {
+        fleeFrom(u, th.x, th.y); u.next = tick + 12;
+        // panic spreads through the herd
+        if (k.herd) forUnitsNear(u.x, u.y, 4, o => { if (o.kind === u.kind && !o.path) { fleeFrom(o, th.x, th.y); o.next = tick + 14; } });
+        return;
+      }
+    }
+    if (grown && cnt < cap && rnd() < k.breed) {
+      let near = 0; forUnitsNear(u.x, u.y, 5, o => { if (o.kind === u.kind) near++; });
+      if (near < 7) spawnUnit(u.kind, u.x, u.y);
+    }
   }
-  if (u.hg > 150) { damage(u, 8, null); if (u.dead) return; }
-  if (u.hg < 70 && u.age > 3 * YEAR && cnt < cap && rnd() < .045) spawnUnit(u.kind, u.x, u.y);
-  if (!u.path) wander(u, u.x | 0, u.y | 0, 6);
+  if (u.path) return;
+  // herd animals drift back towards their companions
+  if (k.herd && rnd() < .5) {
+    let mate = null, md = 1e9;
+    forUnitsNear(u.x, u.y, 10, (o, d2) => { if (o !== u && o.kind === u.kind && d2 > 9 && d2 < md) { md = d2; mate = o; } });
+    if (mate && linePath(u, (u.x + (mate.x - u.x) * .6) | 0, (u.y + (mate.y - u.y) * .6) | 0)) return;
+  }
+  if (rnd() < .65) wander(u, u.x | 0, u.y | 0, k.pred ? 6 : 4);
 }
 
 /* ----- Dragon ----- */
@@ -1352,9 +1478,9 @@ function kingdomTitle(k) { return k.pop >= 150 || k.vids.length >= 6 ? 'empire' 
 function foundVillage(x, y, race, kid, founder, silent) {
   const id = G.nextVid = (G.nextVid || 0) + 1;
   const v = {
-    id, name: placeName(race), kid: 0, race, x, y, founded: G.tick, stock: [36, 24, 0, 0, 0], pop: 0, adults: 0, soldiers: 0,
+    id, name: placeName(race), kid: 0, race, x, y, founded: G.tick, stock: [36, 24, 0, 0, 0, 0, 0, 0], arms: 0, tools: 0, miss: 0, pop: 0, adults: 0, soldiers: 0,
     cap: 5, sites: 0, atk: 0, atkUntil: 0, lastAtk: -9999, siege: 0, radius: 6, lvl: 0, starve: 0, lastSettler: G.tick, lastTrade: G.tick,
-    bids: [], farmIds: [], nb: 0, farms: 0, has: [0, 0, 0, 0, 0, 0, 0, 0], upd: ri(30), cons: 0, empty: 0, members: []
+    bids: [], farmIds: [], nb: 0, farms: 0, has: new Array(BLD.length).fill(0), upd: ri(30), cons: 0, empty: 0, members: []
   };
   G.villages.set(id, v);
   let k = kid ? G.kingdoms.get(kid) : null, fresh = false;
@@ -1390,7 +1516,7 @@ function destroyBuilding(b, silent) {
 }
 function recountVillage(v) {
   const keep = []; v.farmIds.length = 0;
-  let cap = 0, farms = 0, sites = 0; const has = [0, 0, 0, 0, 0, 0, 0, 0];
+  let cap = 0, farms = 0, sites = 0; const has = new Array(BLD.length).fill(0);
   for (const id of v.bids) {
     const b = G.blds.get(id); if (!b) continue;
     keep.push(id);
@@ -1425,7 +1551,21 @@ function siteOK(v, x, y, farm) {
   return ((x - v.x) & 1) === 0 && ((y - v.y) & 1) === 0;
 }
 function chooseSite(v, type) {
-  const farm = type === B_FARM;
+  const farm = type === B_FARM, W = G.W;
+  if (type === B_DOCK) { // must touch water
+    for (let n = 0; n < 90; n++) {
+      const R = v.radius, x = v.x + ri(2 * R + 1) - R, y = v.y + ri(2 * R + 1) - R;
+      if (!siteOK(v, x, y, true)) continue;
+      for (let d = 0; d < 4; d++) { const nx = x + DX8[d], ny = y + DY8[d]; if (inb(nx, ny) && WATER[G.terr[ny * W + nx]]) return [x, y]; }
+    }
+    return null;
+  }
+  if (type === B_MINE && v.spot) { // next to a deposit
+    for (const r of [R_ORE, R_COPPER, R_COAL, R_GOLD, R_GEM, R_STONE]) {
+      const sp = v.spot[r]; if (sp == null || sp < 0) continue;
+      for (let n = 0; n < 14; n++) { const x = (sp % W) + ri(5) - 2, y = ((sp / W) | 0) + ri(5) - 2; if (siteOK(v, x, y, true) && !G.feat[y * W + x]) return [x, y]; }
+    }
+  }
   if (farm && v.farmIds.length && rnd() < .75) {
     for (let n = 0; n < 12; n++) {
       const b = G.blds.get(pick(v.farmIds)); if (!b) continue;
@@ -1452,6 +1592,9 @@ function planBuild(v, k) {
   if (v.farms < 2 || (v.farms < farmNeed && v.stock[0] < pop * 5)) want = B_FARM;
   else if (v.cap < pop + 3) want = B_HOUSE;
   else if (v.farms < farmNeed) want = B_FARM;
+  else if (pop >= 7 && !h[B_SAWMILL] && v.spot && v.spot[R_WOOD] >= 0) want = B_SAWMILL;
+  else if (pop >= 8 && !h[B_DOCK] && !(v.noDock > G.tick)) want = B_DOCK;
+  else if (pop >= 9 && !h[B_MINE] && v.spot && v.spot.some((s, r) => r >= 2 && s >= 0)) want = B_MINE;
   else if (pop >= 10 && !h[B_BARRACKS]) want = B_BARRACKS;
   else if (pop >= 15 && !h[B_MARKET]) want = B_MARKET;
   else if (pop >= 12 && !h[B_TOWER]) want = B_TOWER;
@@ -1461,12 +1604,12 @@ function planBuild(v, k) {
   else if (v.lvl >= 1 && v.stock[1] >= 12 && v.stock[2] >= 10) { // upgrade a house
     for (const id of v.bids) {
       const b = G.blds.get(id);
-      if (b && b.built && b.type === B_HOUSE && b.lvl < Math.min(2, v.lvl)) { b.lvl++; b.mhp += 60; b.hp = b.mhp; v.stock[1] -= 8; v.stock[2] -= 8; recountVillage(v); return; }
+      if (b && b.built && b.type === B_HOUSE && b.lvl < v.lvl) { b.lvl++; b.mhp += 60; b.hp = b.mhp; v.stock[1] -= 8; v.stock[2] -= 8; recountVillage(v); return; }
     }
     if (v.cap < pop + 6) want = B_HOUSE;
   }
   if (want < 0 || !canAfford(v, want)) { if (want !== B_HOUSE && want !== B_FARM && v.cap < pop + 2 && canAfford(v, B_HOUSE)) want = B_HOUSE; else return; }
-  const s = chooseSite(v, want); if (!s) return;
+  const s = chooseSite(v, want); if (!s) { if (want === B_DOCK) v.noDock = G.tick + 4000; return; }
   const c = BLD[want].cost; for (let r = 1; r < 5; r++) v.stock[r] -= c[r];
   placeBuilding(v, want, s[0], s[1], false);
 }
@@ -1501,7 +1644,7 @@ function doTrade(u) {
   u.tk = 0; u.tt = -1;
   if (!v || !pv || isWar(v.kid, pv.kid)) { u.role = RL_WORKER; resetTask(u); return; }
   let give = 1, get = 1, gb = -1e9, tb = -1e9;
-  for (let r = 0; r < 4; r++) { const a = v.stock[r] - pv.stock[r]; if (a > gb) { gb = a; give = r; } if (-a > tb) { tb = -a; get = r; } }
+  for (let r = 0; r < NRES; r++) { if (r === R_GOLD) continue; const a = v.stock[r] - pv.stock[r]; if (a > gb) { gb = a; give = r; } if (-a > tb) { tb = -a; get = r; } }
   const g1 = Math.min(10, v.stock[give] | 0); v.stock[give] -= g1; pv.stock[give] += g1;
   const g2 = Math.min(10, pv.stock[get] | 0); pv.stock[get] -= g2; v.stock[get] += g2;
   pv.stock[R_GOLD] += 4;
@@ -1542,19 +1685,24 @@ function updateVillage(v) {
     }
     if (!done) { removeVillage(v, true); return; }
   }
-  // food
+  // economy cycle: famine check and workshops turning raw materials into goods
   if (++v.cons >= 4) {
     v.cons = 0;
-    v.stock[0] -= v.adults * .75 + (v.pop - v.adults) * .4;
-    if (v.stock[0] < 0) {
-      v.stock[0] = 0;
-      if (v.stock[R_GOLD] >= 5 && v.has[B_MARKET]) { v.stock[R_GOLD] -= 5; v.stock[0] += 18; }
-      else {
-        v.starve++;
-        for (const u of m) if (!u.dead && rnd() < .22) damage(u, 22, null);
-        if (v.starve === 3 && tick - (v.lastFamine || -9999) > 2400) { v.lastFamine = tick; logEvent('ev.famine', [v.name], v.x, v.y, 'bad'); }
-      }
-    } else v.starve = 0;
+    const s = v.stock;
+    if (s[0] < v.pop && s[R_GOLD] >= 5 && v.has[B_MARKET]) { s[R_GOLD] -= 5; s[0] += 18; } // import food
+    if (v.miss > 0) { v.starve++; if (v.starve === 3 && tick - (v.lastFamine || -9999) > 2400) { v.lastFamine = tick; logEvent('ev.famine', [v.name], v.x, v.y, 'bad'); } }
+    else v.starve = 0;
+    v.miss = 0;
+    if (v.has[B_SMITHY] && s[R_ORE] >= 2 && s[R_COAL] >= 1 && v.arms < v.soldiers * 3 + 6) { s[R_ORE] -= 2; s[R_COAL] -= 1; v.arms += 2; }
+    v.arms = Math.max(0, v.arms - v.soldiers * .04);
+    if (s[R_COPPER] >= 1 && v.tools < v.pop) { s[R_COPPER] -= 1; v.tools += 4; }
+    v.tools = Math.max(0, v.tools - v.pop * .03);
+    if (v.has[B_MARKET] && s[R_GEM] >= 1) { s[R_GEM] -= 1; s[R_GOLD] += 5; }
+    s[R_STONE] += v.has[B_MINE]; s[0] += v.has[B_DOCK] * 2;
+    if (v.has[B_SAWMILL]) { // foresters replant
+      const R = v.radius + 3, x = v.x + ri(2 * R + 1) - R, y = v.y + ri(2 * R + 1) - R;
+      if (inb(x, y)) { const i = y * W + x; if (G.terr[i] === T_GRASS && !G.bldAt[i] && !G.feat[i] && !nearBuilding(x, y)) { setTerr(x, y, T_FOREST); G.amt[i] = 2; } }
+    }
   }
   // farms grow
   for (const id of v.farmIds) { const b = G.blds.get(id); if (b && b.grow < 100) b.grow = Math.min(100, b.grow + 10); }
@@ -1578,7 +1726,7 @@ function updateVillage(v) {
         let bx = v.x, by = v.y;
         for (let n = 0; n < 4; n++) { const b = G.blds.get(pick(v.bids)); if (b && b.built && b.type === B_HOUSE) { bx = b.x; by = b.y; break; } }
         const baby = spawnUnit(mother.kind, bx + .5, by + .5);
-        if (baby) { baby.vid = v.id; baby.kid = v.kid; mother.kids++; v.stock[0] -= 3; G.stats.births++; G.civCount++; }
+        if (baby) { baby.ate = tick; baby.vid = v.id; baby.kid = v.kid; mother.kids++; v.stock[0] -= 3; G.stats.births++; G.civCount++; }
       }
     }
   }
@@ -1640,7 +1788,7 @@ function updateVillage(v) {
 /** Recount populations (run every few ticks). */
 function census() {
   for (const v of G.villages.values()) { v.members.length = 0; v.adults = 0; v.soldiers = 0; }
-  const cnt = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const cnt = new Array(KIND.length).fill(0);
   let civ = 0;
   for (const u of G.units) {
     if (u.dead) continue;
@@ -1656,7 +1804,7 @@ function census() {
   G.count = cnt; G.civCount = civ;
   if (!G.caps || G.capsVer !== G.regionTick) {
     let land = 0; const terr = G.terr; for (let i = 0; i < terr.length; i++) if (WALK[terr[i]]) land++;
-    G.caps = [0, 0, 0, 0, land / 110, land / 170, land / 800, land / 1700, 60, 3]; G.capsVer = G.regionTick;
+    G.caps = KIND.map(k => k.cap ? land / k.cap : 0); G.capsVer = G.regionTick;
   }
 }
 
@@ -1985,8 +2133,13 @@ function worldEvents() {
   const r = rnd(), vs = [...G.villages.values()], dis = G.opts.disasters;
   // keep the wilderness alive: predators return from beyond the map's edge
   if (G.count && G.caps) {
-    if (G.count[K_WOLF] < G.caps[K_WOLF] * .3 && rnd() < .3) { const p = randomLand(t => t === T_FOREST || t === T_TAIGA); if (p && !G.owner[p[1] * G.W + p[0]]) for (let n = 0; n < 3; n++) spawnUnit(K_WOLF, p[0] + .5, p[1] + .5); }
-    if (G.count[K_BEAR] < G.caps[K_BEAR] * .3 && rnd() < .2) { const p = randomLand(t => t === T_FOREST || t === T_TAIGA || t === T_HILL); if (p && !G.owner[p[1] * G.W + p[0]]) spawnUnit(K_BEAR, p[0] + .5, p[1] + .5); }
+    for (const kind of ANIMAL_KINDS) {
+      if (G.count[kind] >= G.caps[kind] * .3 || rnd() > .3) continue;
+      const p = randomLand(t => habitatOK(kind, t)); if (!p || G.owner[p[1] * G.W + p[0]]) continue;
+      const g = KIND[kind].herd ? 4 : 2;
+      for (let m = 0; m < g; m++) spawnUnit(kind, p[0] + .5 + rr(-1.5, 1.5), p[1] + .5 + rr(-1.5, 1.5));
+      if (kind === K_SHEEP || kind === K_DEER || kind === K_COW) logEvent('ev.herd', ['@kind.' + KIND[kind].key], p[0], p[1], 'nature');
+    }
   }
   if (r < .12) { const p = randomLand(); if (p) { addRain(p[0], p[1], 8 + ri(4), 700 + ri(500), true); logEvent('ev.storm', [], p[0], p[1], 'nature'); } }
   else if (r < .16) { const big = vs.filter(v => v.pop >= 20); if (big.length && dis) { const v = pick(big); for (let n = 0; n < 3; n++) { const u = pick(v.members); if (u) u.sick = 700; } logEvent('ev.plague', [v.name], v.x, v.y, 'bad'); } }
@@ -2000,11 +2153,6 @@ function worldEvents() {
   else if (r < .325) { if (dis) { const p = randomLand(); if (p) { dropMeteor(p[0], p[1]); logEvent('ev.meteor', [], p[0], p[1], 'bad'); } } }
   else if (r < .335) { if (dis) { const p = randomLand(); if (p) { earthquake(p[0], p[1], 9); logEvent('ev.quake', [], p[0], p[1], 'bad'); } } }
   else if (r < .34) { if (dis) { const p = randomLand(t => t === T_MOUNT || t === T_PEAK); if (p) { startVolcano(p[0], p[1]); logEvent('ev.volcano', [], p[0], p[1], 'bad'); } } }
-  else if (r < .42) {
-    if (G.count && G.count[K_SHEEP] < G.caps[K_SHEEP] * .4) { const p = randomLand(t => t === T_GRASS); if (p) { for (let n = 0; n < 6; n++) spawnUnit(K_SHEEP, p[0] + .5 + rr(-2, 2), p[1] + .5 + rr(-2, 2)); logEvent('ev.herd', [], p[0], p[1], 'nature'); } }
-    if (G.count && G.count[K_RABBIT] < G.caps[K_RABBIT] * .3) { const p = randomLand(t => t === T_GRASS); if (p) for (let n = 0; n < 5; n++) spawnUnit(K_RABBIT, p[0] + .5 + rr(-2, 2), p[1] + .5 + rr(-2, 2)); }
-    if (G.count && G.count[K_WOLF] < 2 && rnd() < .5) { const p = randomLand(t => t === T_FOREST || t === T_TAIGA); if (p) for (let n = 0; n < 3; n++) spawnUnit(K_WOLF, p[0] + .5, p[1] + .5); }
-  }
 }
 
 /* ----- Territory ----- */
@@ -2056,7 +2204,12 @@ function simTick() {
 function primeWorld() {
   if (!G.opts) G.opts = { disasters: true };
   computeRegions(); rebuildGrid();
-  for (const v of G.villages.values()) { if (!v.members) v.members = []; if (!v.farmIds) v.farmIds = []; recountVillage(v); }
+  for (const v of G.villages.values()) {
+    if (!v.members) v.members = []; if (!v.farmIds) v.farmIds = [];
+    while (v.stock.length < NRES) v.stock.push(0);
+    v.arms = v.arms || 0; v.tools = v.tools || 0; v.miss = v.miss || 0;
+    recountVillage(v);
+  }
   census(); recomputeOwners();
 }
 
@@ -2121,7 +2274,10 @@ const POWERS = [
   { id: 'berry', cat: 'nature', icon: '🍓', type: 'spray', gap: 1.5, fn: featPower(F_BERRY, 3) },
   { id: 'stone', cat: 'nature', icon: '🪨', type: 'spray', gap: 1.5, fn: featPower(F_STONE, 30) },
   { id: 'ore', cat: 'nature', icon: '⛏️', type: 'spray', gap: 1.5, fn: featPower(F_ORE, 20) },
+  { id: 'copper', cat: 'nature', icon: '🟠', type: 'spray', gap: 1.5, fn: featPower(F_COPPER, 20) },
+  { id: 'coal', cat: 'nature', icon: '⚫', type: 'spray', gap: 1.5, fn: featPower(F_COAL, 24) },
   { id: 'gold', cat: 'nature', icon: '🪙', type: 'spray', gap: 1.5, fn: featPower(F_GOLD, 12) },
+  { id: 'gem', cat: 'nature', icon: '💎', type: 'spray', gap: 1.5, fn: featPower(F_GEM, 8) },
   // creatures
   { id: 'human', cat: 'life', icon: '🧑', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_HUMAN) },
   { id: 'elf', cat: 'life', icon: '🧝', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_ELF) },
@@ -2129,6 +2285,10 @@ const POWERS = [
   { id: 'dwarf', cat: 'life', icon: '🧔', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_DWARF) },
   { id: 'sheep', cat: 'life', icon: '🐑', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_SHEEP) },
   { id: 'rabbit', cat: 'life', icon: '🐇', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_RABBIT) },
+  { id: 'deer', cat: 'life', icon: '🦌', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_DEER) },
+  { id: 'cow', cat: 'life', icon: '🐄', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_COW) },
+  { id: 'boar', cat: 'life', icon: '🐗', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_BOAR) },
+  { id: 'fox', cat: 'life', icon: '🦊', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_FOX) },
   { id: 'wolf', cat: 'life', icon: '🐺', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_WOLF) },
   { id: 'bear', cat: 'life', icon: '🐻', type: 'spray', gap: 2, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_BEAR) },
   { id: 'skeleton', cat: 'life', icon: '💀', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_SKEL) },
@@ -2151,7 +2311,7 @@ const POWERS = [
   { id: 'demolish', cat: 'divine', icon: '🔨', type: 'paint', desc: 'd.demolish', fn: (x, y, r) => brushTiles(x, y, r, (tx, ty, i) => { const b = G.blds.get(G.bldAt[i]); if (b) destroyBuilding(b); }) },
   { id: 'gift', cat: 'divine', icon: '🎁', type: 'tap', nobrush: 1, desc: 'd.gift', fn: (x, y) => {
     const v = G.villages.get(G.owner[y * G.W + x]); if (!v) return 't.novillage';
-    v.stock[0] += 80; v.stock[1] += 50; v.stock[2] += 35; v.stock[3] += 10; v.stock[4] += 12;
+    v.stock[0] += 80; v.stock[1] += 50; v.stock[2] += 35; v.stock[3] += 10; v.stock[4] += 12; v.stock[5] += 10; v.stock[6] += 10; v.stock[7] += 2;
     fxBurst(v.x + .5, v.y + .5, 20, ['#fd4', '#fff', '#8f8'], .12, 30); return ['t.gift', v.name];
   } },
   { id: 'hero', cat: 'divine', icon: '🦸', type: 'tap', nobrush: 1, desc: 'd.hero', fn: (x, y) => {
@@ -2187,7 +2347,7 @@ function b64enc(u8) { let s = ''; for (let i = 0; i < u8.length; i += 8192) s +=
 function b64dec(str) { const s = atob(str), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
 function rleEnc(a) { const out = []; let i = 0; const n = a.length; while (i < n) { const v = a[i]; let c = 1; while (i + c < n && a[i + c] === v && c < 255) c++; out.push(c, v); i += c; } return b64enc(Uint8Array.from(out)); }
 function rleDec(str, target) { const d = b64dec(str); let p = 0; for (let i = 0; i < d.length; i += 2) { const c = d[i], v = d[i + 1]; target.fill(v, p, p + c); p += c; } }
-const UF = ['id', 'kind', 'x', 'y', 'hp', 'mhp', 'age', 'life', 'dir', 'st', 'role', 'vid', 'kid', 'tk', 'tt', 'tid', 'cr', 'ca', 'wt', 'name', 'sex', 'kills', 'kids', 'hg', 'sick', 'imm', 'hero', 'bless', 'guard', 'rest', 'nom'];
+const UF = ['id', 'kind', 'x', 'y', 'hp', 'mhp', 'age', 'life', 'dir', 'st', 'role', 'vid', 'kid', 'tk', 'tt', 'tid', 'cr', 'ca', 'wt', 'name', 'sex', 'kills', 'kids', 'hg', 'sick', 'imm', 'hero', 'bless', 'guard', 'rest', 'nom', 'ate', 'slept', 'fast', 'home', 'job', 'hair'];
 function serializeWorld() {
   const r2 = v => typeof v === 'number' && v % 1 ? Math.round(v * 100) / 100 : v;
   return JSON.stringify({
@@ -2210,7 +2370,8 @@ function deserializeWorld(json) {
   for (let i = 0; i < G.terr.length; i++) { if (G.fire[i]) G.fires.push(i); if (G.terr[i] === T_LAVA) G.lavas.push(i); }
   for (const a of d.units) {
     const u = {}; UF.forEach((f, i) => u[f] = a[i]);
-    u.path = null; u.mode = 0; u.next = G.tick + 1 + ri(12); u.hit = -99; u.ox = rr(-.28, .28); u.oy = rr(-.28, .28);
+    if (u.ate == null) { u.ate = G.tick - ri(200); u.slept = G.tick - ri(900); u.fast = 0; u.home = 0; u.job = -1; u.hair = ri(4); }
+    u.jf = 0; u.path = null; u.mode = 0; u.next = G.tick + 1 + ri(12); u.hit = -99; u.ox = rr(-.28, .28); u.oy = rr(-.28, .28);
     G.units.push(u); G.unitById.set(u.id, u);
   }
   for (const b of d.blds) { G.blds.set(b.id, b); G.bldAt[b.y * G.W + b.x] = b.id; }
@@ -2265,7 +2426,7 @@ const SPAL = {
   treeA: ['#2f7d32', '#45a047', '#1f5c26', '#6b4a2a'], treeB: ['#3a8a30', '#58b048', '#27682a', '#6b4a2a'], treeC: ['#2a7040', '#3f9558', '#1c5230', '#5d4025'],
   pine: ['#2c5d4f', '#f4f8fa', '#1c4539', '#5d4025'], mount: ['#8b8b93', '#a8a8b0', '#65656e', '', '#f4f6fa'],
   hill: ['#8da456', '#a5bd6c', '#6d8140'], rock: ['#9a9aa2', '#b9b9c0', '#74747c'], ore: ['#8a8a92', '#a9a9b0', '#686870', '', '', '#3d5a9e'],
-  gold: ['#9a9aa2', '#b9b9c0', '#74747c', '', '', '#f7c62f'], bush: ['#3c8f3c', '#52a850', '#2a6a2c', '', '', '#d8344a'], cactus: ['#3f8f4a']
+  gold: ['#9a9aa2', '#b9b9c0', '#74747c', '', '', '#f7c62f'], copper: ['#8f8a86', '#aaa49e', '#6c6763', '', '', '#e07a2c'], coal: ['#77777f', '#8e8e96', '#55555c', '', '', '#15151a'], gem: ['#8a8a96', '#a9a9b6', '#666672', '', '', '#4fe3e8'], iron: ['#8a8a92', '#a9a9b0', '#686870', '', '', '#b5543a'], bush: ['#3c8f3c', '#52a850', '#2a6a2c', '', '', '#d8344a'], cactus: ['#3f8f4a']
 };
 for (const k in SPAL) SPAL[k] = SPAL[k].map(h => h ? C(h) : 0);
 const FOAM = C('#bfe3f7'), FLOWERS = ['#f7e15c', '#ffffff', '#f29ac0'].map(C), DARKGRASS = C('#559636');
@@ -2312,8 +2473,7 @@ function tilePixels(x, y, buf, o, stride) {
   const f = G.feat[i];
   if (f === F_BERRY) stamp(buf, o, stride, G.amt[i] > 0 ? STAMP.bush : STAMP.bush0, SPAL.bush);
   else if (f === F_STONE) stamp(buf, o, stride, STAMP.rock, SPAL.rock);
-  else if (f === F_ORE) stamp(buf, o, stride, STAMP.ore, SPAL.ore);
-  else if (f === F_GOLD) stamp(buf, o, stride, STAMP.ore, SPAL.gold);
+  else if (f >= F_ORE) stamp(buf, o, stride, STAMP.ore, f === F_ORE ? SPAL.iron : f === F_GOLD ? SPAL.gold : f === F_COPPER ? SPAL.copper : f === F_COAL ? SPAL.coal : SPAL.gem);
 }
 
 /* ----- Sprites ----- */
@@ -2336,6 +2496,10 @@ const USPR = {
   rabbit: [['...ee', '.bbbk', 'bbbbb', '.b.b.'], ['...ee', '.bbbk', 'bbbbb', 'b...b']],
   wolf: [['.....gg.', 'ggggggk.', 'dgggggg.', '.g...g..', '.g...g..'], ['.....gg.', 'ggggggk.', 'dgggggg.', '.g...g..', 'g.....g.']],
   bear: [['.......b.', '.bbbbbbbb', 'bbbbbbbkb', 'bbbbbbbb.', '.bb..bb..', '.bb..bb..'], ['.......b.', '.bbbbbbbb', 'bbbbbbbkb', 'bbbbbbbb.', '.bb..bb..', 'bb....bb.']],
+  deer: [['.....a.a', '......dd', '.dddddde', 'wddddd..', '.d...d..', '.d...d..'], ['.....a.a', '......dd', '.dddddde', 'wddddd..', '.d...d..', 'd.....d.']],
+  cow: [['......h.h', '.wwkkwwww', 'wwwkkwwwe', 'wkwwwwwp.', '.w...w...', '.w...w...'], ['......h.h', '.wwkkwwww', 'wwwkkwwwe', 'wkwwwwwp.', '.w...w...', 'w.....w..']],
+  fox: [['......o.', 'wooooooe', '.oooooo.', '.o....o.'], ['......o.', 'wooooooe', '.oooooo.', 'o......o']],
+  boar: [['..bbbb..', 'bbbbbbbe', 'bbbbbbbt', '.b...b..', '.b...b..'], ['..bbbb..', 'bbbbbbbe', 'bbbbbbbt', '.b...b..', 'b.....b.']],
   dragon: [
     ['....WW......', '...WWWW.....', '..WWWWWW..hh', 'rrRRRRRRRhhe', '..RRRRRRRRhh', 't..RRRRRR...', 'tt.R....R...', '.ttt........'],
     ['............', '............', '..........hh', 'rrRRRRRRRhhe', '..RRRRRRRRhh', 't.WWWWWWR...', 'tt.WWWW.R...', '.ttt.WW.....']],
@@ -2345,44 +2509,81 @@ const UPAL = {
   human: { h: '#6b4423', s: '#f0c8a0', d: '#3a3a4a' }, elf: { h: '#f0d878', s: '#f6dcc0', d: '#3a4a3a' }, orc: { h: '#2e2e2e', s: '#6aa84f', d: '#3a2e24', t: '#ffffff' },
   dwarf: { h: '#9aa0a8', s: '#e8b890', d: '#3a2e24', b: '#c8641e' }, skeleton: { h: '#e8e8e0', s: '#e8e8e0', d: '#b8b8b0', c: '#cfcfc6', x: '#9a9a9a' },
   sheep: { w: '#f4f4f0', k: '#3a3a3a' }, rabbit: { b: '#c9a27a', e: '#b08a64', k: '#2a2a2a' }, wolf: { g: '#8a8a94', d: '#6a6a74', k: '#2a2a2a' }, bear: { b: '#7a4a28', k: '#1a1a1a' },
+  deer: { d: '#a8763e', a: '#e8dcc0', w: '#f4f0e4', e: '#2a1a10' }, cow: { w: '#f2efe8', k: '#3a3230', h: '#d8d0b8', e: '#1a1a1a', p: '#e8a0a0' }, fox: { o: '#e07a2c', w: '#f8f4ec', e: '#1a1a1a' }, boar: { b: '#5a4032', e: '#1a1a1a', t: '#f4f0e4' },
   dragon: { W: '#c23a2a', R: '#e0493a', r: '#a02a20', h: '#e0493a', e: '#ffe14a', t: '#a02a20' }
 };
 const BSPR = {
-  house0: ['........', '...RR...', '..RRRr..', '.RRRRrr.', '.RRRRrr.', '.WWDWww.', '.WWDWww.', '........'],
-  house1: ['..RRRr..', '.RRRRrr.', 'RRRRRrrr', 'RRRRRrrr', '.WWWWww.', '.WGWDww.', '.WWWDww.', '........'],
-  house2: ['..RRRr..', '.RRRRrr.', 'RRRRRrrr', '.WGWGww.', '.WWWWww.', 'RRRRRrrr', '.WGWWww.', '.WWDWww.', '.WWDWww.'],
+  // humans: thatch → tiled cottages → timber townhouses
+  house0_0: ['........', '..TTTt..', '.TTTTtt.', 'TTTTTttt', '.WWWWww.', '.WWDWww.', '.WWDWww.', '........'],
+  house0_1: ['.....K..', '..RRRK..', '.RRRRrr.', 'RRRRRrrr', '.WWWWww.', '.WGWDww.', '.WWWDww.', '........'],
+  house0_2: ['.....K..', '..RRRKr.', '.RRRRrr.', 'RRRRRrrr', '.WGWGww.', '.KKKKKK.', '.WGWDww.', '.WWWDww.', '........'],
+  house0_3: ['..RRRr.K', '.RRRRrrK', 'RRRRRrrr', '.WGWGww.', '.WWWWww.', '.KKKKKK.', '.WGWGww.', '.WWWWww.', '.WGDDGw.', '.WWDDWw.', '........'],
+  // elves: living tree-houses
+  house1_0: ['..LLLl..', '.LLLLLl.', 'LLLLLLll', '.LLLLll.', '..WDww..', '..WDww..', '........'],
+  house1_1: ['..LLLl..', '.LLLLLl.', 'LLLLLLll', 'LLGLLLll', '.LLLLll.', '..WWww..', '.WWDWww.', '........'],
+  house1_2: ['...LLl..', '..LLLLl.', '.LLLLLll', 'LLLGLLll', 'LLLLLLll', '.LLWwll.', '.LLWwLl.', '..WGww..', '.WWDWww.', '........'],
+  house1_3: ['...LLl..', '..LLLLl.', '.LLLGLll', 'LLLLLLll', '.LLLLll.', '..WWww..', '.LLWwLl.', 'LLLGLLll', '.LLLLll.', '..WGww..', '.WWDWww.', '........'],
+  // orcs: hide tents and spiked longhouses
+  house2_0: ['...B....', '...HB...', '..HHh...', '..HHhh..', '.HHDhh..', '.HHDhhh.', 'HHHDhhhh', '........'],
+  house2_1: ['B......B', 'B.HHHh.B', '.HHHHhh.', 'HHHHHhhh', 'HFHHHhFh', '.WWDWww.', '.WWDWww.', '........'],
+  house2_2: ['B..BB..B', 'BHHHHhhB', 'HHHHHhhh', 'HHFHHFhh', 'WWWWWwww', 'WGWDDwGw', 'WWWDDwww', '........'],
+  house2_3: ['B.B..B.B', 'BHHHHhhB', 'HHHHHhhh', 'WWFWWFww', 'WWWWWwww', 'HHHHHhhh', 'WGWWWwGw', 'WWWDDwww', 'WWWDDwww', '........'],
+  // dwarves: stone halls
+  house3_0: ['........', '........', '.SSSSSs.', 'SSSSSSss', 'SsSSSsSs', 'SSSDDSss', 'SSSDDSss', '........'],
+  house3_1: ['.....KK.', '.RRRRKK.', 'RRRRRRrr', 'SSSSSSss', 'SOSSSOss', 'SSSDDSss', 'SSSDDSss', '........'],
+  house3_2: ['.....KK.', '.RRRRKK.', 'RRRRRRrr', 'SOSSSOss', 'SSSSSSss', 'sSsSsSsS', 'SOSDDSOs', 'SSSDDSss', '........'],
+  house3_3: ['S.S..S.S', 'SSSSSSss', 'SOSSSOss', 'SSSSSSss', 'RRRRRRrr', 'SOSSSOss', 'SSSSSSss', 'sSsSsSsS', 'SOSDDSOs', 'SSSDDSss', '........'],
   hall: ['.....KFF....', '.....KFF....', '.....K......', '...RRRRRr...', '..RRRRRRrr..', '.RRRRRRRrrr.', 'RRRRRRRRrrrr', '.WWWWWWWwww.', '.WGWWWWWGww.', '.WWWDDWWwww.', '.WWWDDWWwww.', '.SSSSSSSsss.'],
   barracks: ['.FF.....', '.K.S.S.S', '.KSSSSSs', '.SSSSSSs', '.SKSSKSs', '.SSSSSSs', '.SSDDSSs', '.SSDDSSs'],
   market: ['........', '.FYFYFY.', 'FYFYFYFY', '.K....K.', '.KWWWWK.', '.WYWOWw.', '.WWWWWw.', '........'],
   tower: ['.FF.....', '.K......', '.S.SS.S.', '.SSSSSs.', '.SSSSSs.', '..SSSs..', '..SKSs..', '..SSSs..', '..SKSs..', '.SSDSSs.', '.SSDSSs.'],
   temple: ['...YY...', '...YY...', '..SSSs..', '.SSSSSs.', 'SSSSSSSs', '.S.S.Ss.', '.S.S.Ss.', 'SSSSSSSs'],
   smithy: ['.....KK.', '.....KK.', '.rrrrKK.', 'rrrrrrr.', '.SSSSSs.', '.SOSDSs.', '.SSSDSs.', '........'],
+  mine: ['........', '..SSSs..', '.SSSSSs.', 'SSTTTTss', 'SSTXXTss', 'SSTXXTss', 'sSTXXTsO', '........'],
+  sawmill: ['........', '.RRRRr..', 'RRRRRrr.', '.WWWWw..', '.WDWWw.E', '.WDWWEEE', '.....EEE', '........'],
+  dock: ['...F....', '...K....', '.RRRRr..', 'RRRRRrr.', '.WWDWw..', 'EEEEEEEE', 'E.E..E.E', '........'],
   site: ['........', '.K....K.', '.KKKKKK.', '.K.YY.K.', '.KKKKKK.', '.K.YY.K.', '.KWWWWK.', '........']
 };
 const BPAL = [
   { R: '#c0473a', r: '#96362d', W: '#e8d9b0', w: '#c9b88e', D: '#5a3a22' },
-  { R: '#3f9a58', r: '#2f7a45', W: '#f0ead8', w: '#d4ccb4', D: '#7a5a34' },
+  { R: '#3f9a58', r: '#2f7a45', W: '#f0ead8', w: '#d4ccb4', D: '#7a5a34', G: '#ffe98a' },
   { R: '#7a5a3a', r: '#5c432b', W: '#a08a6a', w: '#84705a', D: '#2e2218' },
   { R: '#4a5568', r: '#374151', W: '#b9b3ab', w: '#96908a', D: '#3a2a1a' }
 ];
-const BCOMMON = { S: '#a9a9b3', s: '#82828c', K: '#2a2a30', Y: '#f2c230', G: '#8fd3ff', O: '#ff9a3c' };
+const BCOMMON = { S: '#a9a9b3', s: '#82828c', K: '#2a2a30', Y: '#f2c230', G: '#8fd3ff', O: '#ff9a3c', T: '#d9b35a', t: '#b8923e', L: '#3f9a58', l: '#2a7040', H: '#9a6b42', h: '#74502f', B: '#f0ead8', X: '#141418', E: '#8a5a30' };
 const sprCache = new Map();
+const HAIRS = [['#6b4423', '#2a2220', '#d9b35a', '#b5522a'], ['#f0d878', '#e8e8f0', '#b5723a', '#f6e6a8'], ['#2e2e2e', '#4a2e22', '#2e2e2e', '#5a5a5a'], ['#c8641e', '#7a4a28', '#b9b9b9', '#a03a1a']];
+const ORC_SKIN = ['#6aa84f', '#7d9a3e', '#5a9a6a', '#8aa860'];
+/** Female variants: longer hair and a dress; dwarven women go beardless. */
+function femaleRows(rows, key) {
+  const out = rows.map(r => r.split(''));
+  const face = out.findIndex(r => r.includes('s'));
+  if (key === 'dwarf') { for (const r of out) for (let i = 0; i < r.length; i++) if (r[i] === 'b') r[i] = 'c'; }
+  if (key === 'orc') { if (face >= 0) { out[face][1] = 'h'; out[face][2] = 'h'; out[face][3] = 'h'; } }
+  else if (face >= 0) { if (out[face][0] === '.') out[face][0] = 'h'; if (out[face][4] === '.') out[face][4] = 'h'; if (out[face + 1] && key !== 'dwarf') { if (out[face + 1][0] === '.') out[face + 1][0] = 'h'; } }
+  const legs = out.length - 2;
+  if (key !== 'orc' && out[legs]) { out[legs][0] = out[legs][0] === '.' ? 'c' : out[legs][0]; out[legs][1] = 'c'; out[legs][2] = 'c'; out[legs][3] = 'c'; out[legs][4] = out[legs][4] === '.' ? 'c' : out[legs][4]; }
+  return out.map(r => r.join(''));
+}
 function unitSprite(u, frame, flip, boat) {
   const k = KIND[u.kind], kd = u.kid ? G.kingdoms.get(u.kid) : null, col = kd ? KCOLORS[kd.color] : '#9a8f80';
-  const role = k.civ ? u.role : 0;
-  const key = (boat ? 'b' : u.kind) + '|' + col + '|' + role + '|' + frame + '|' + (flip ? 1 : 0);
+  const role = k.civ ? u.role : 0, old = k.civ && u.age > u.life * .78 ? 1 : 0, hv = k.civ ? (u.hair || 0) & 3 : 0, sex = k.civ ? u.sex : 0;
+  const key = (boat ? 'b' : u.kind) + '|' + col + '|' + role + '|' + frame + '|' + (flip ? 1 : 0) + '|' + sex + hv + old;
   let s = sprCache.get(key);
   if (!s) {
     if (boat) s = makeSprite(USPR.boat[0], { S: '#f4f0e4', c: col, K: '#5a3a22', B: '#7a5230' }, flip);
     else {
       const base = UPAL[k.key] || UPAL.human, pal = Object.assign({ c: col }, base);
+      let rows = USPR[k.key === 'skeleton' ? 'human' : k.key]; rows = rows[frame % rows.length];
       if (k.civ) {
+        const hc = old ? '#d8d8d8' : HAIRS[u.kind][hv];
+        if (u.kind === K_DWARF) { pal.b = hc; } else if (u.kind !== K_ORC) pal.h = hc; else { pal.s = ORC_SKIN[hv]; if (old) pal.h = '#9a9a9a'; }
         if (role === RL_SOLDIER) { pal.x = '#d8dce6'; pal.h = '#aab0bc'; }
         else if (role === RL_KING) { pal.h = '#ffd23c'; pal.x = '#ffd23c'; }
         else if (role === RL_TRADER) pal.x = '#b07840';
+        if (sex === 1 && role !== RL_SOLDIER) rows = femaleRows(rows, k.key);
       }
-      const rows = USPR[k.key === 'skeleton' ? 'human' : k.key];
-      s = makeSprite(rows[frame % rows.length], pal, flip);
+      s = makeSprite(rows, pal, flip);
     }
     sprCache.set(key, s);
   }
@@ -2390,15 +2591,16 @@ function unitSprite(u, frame, flip, boat) {
 }
 function bldSprite(b, v, kd) {
   let name;
-  if (!b.built) name = 'site';
-  else switch (b.type) { case B_HALL: name = 'hall'; break; case B_HOUSE: name = 'house' + Math.min(2, b.lvl); break; case B_BARRACKS: name = 'barracks'; break; case B_MARKET: name = 'market'; break; case B_TOWER: name = 'tower'; break; case B_TEMPLE: name = 'temple'; break; case B_SMITHY: name = 'smithy'; break; default: name = 'site'; }
+  switch (b.type) { case B_HALL: name = 'hall'; break; case B_HOUSE: name = 'house' + ((v ? v.race : 0) & 3) + '_' + Math.min(3, b.lvl); break; case B_MINE: name = 'mine'; break; case B_SAWMILL: name = 'sawmill'; break; case B_DOCK: name = 'dock'; break; case B_BARRACKS: name = 'barracks'; break; case B_MARKET: name = 'market'; break; case B_TOWER: name = 'tower'; break; case B_TEMPLE: name = 'temple'; break; case B_SMITHY: name = 'smithy'; break; default: name = 'site'; }
   const race = v ? v.race : 0, col = kd ? KCOLORS[kd.color] : '#999';
   const key = 'B' + name + '|' + race + '|' + col;
   let s = sprCache.get(key);
   if (!s) { s = makeSprite(BSPR[name], Object.assign({ F: col }, BCOMMON, BPAL[race] || BPAL[0])); sprCache.set(key, s); }
   return s;
 }
-let farmSpr = null, flameSpr = null;
+let farmSpr = null, flameSpr = null, _site = null;
+function siteSpr() { return _site || (_site = makeSprite(BSPR.site, BCOMMON)); }
+const TOOLCOL = { 1: '#b8bcc8', 2: '#8a8a92', 3: '#8a8a92', 4: '#8a8a92', 5: '#d8344a', 6: '#e8c64a', 7: '#e8e8e8', 9: '#c9a06a' };
 function buildMiscSprites() {
   farmSpr = [];
   const soil = ['#8a6238', '#7a5530'], crop = [null, '#6fbf4a', '#4f9f38', '#e8c64a'];
@@ -2537,9 +2739,24 @@ function render(dt, paused) {
     const sx = w2sx(b.x * TS), sy = w2sy(b.y * TS);
     if (b.type === B_FARM && b.built) { ctx.drawImage(farmSpr[b.grow >= 100 ? 3 : b.grow >= 60 ? 2 : b.grow >= 25 ? 1 : 0], sx, sy, ts, ts); continue; }
     const v = G.villages.get(b.vid), kd = v ? G.kingdoms.get(v.kid) : null, s = bldSprite(b, v, kd);
-    ctx.drawImage(s, sx + (TS - s.width) / 2 * z, sy + (TS - s.height) * z, s.width * z, s.height * z);
-    if (b.built && b.hp < b.mhp * .6 && z >= 2) { ctx.fillStyle = 'rgba(30,20,10,.45)'; ctx.fillRect(sx + z, sy + z * 2, z * 2, z); ctx.fillRect(sx + z * 4, sy + z * 4, z * 2, z); }
+    const bx = sx + (TS - s.width) / 2 * z, by = sy + (TS - s.height) * z;
+    if (!b.built) { // the building rises from the ground inside its scaffold
+      const f = clamp(b.prog / 100, 0, 1), hh = Math.max(1, Math.round(s.height * (.25 + f * .6)));
+      ctx.globalAlpha = .9; ctx.drawImage(s, 0, s.height - hh, s.width, hh, bx, by + (s.height - hh) * z, s.width * z, hh * z); ctx.globalAlpha = 1;
+      ctx.drawImage(siteSpr(), sx, sy, ts, ts);
+      continue;
+    }
+    ctx.drawImage(s, bx, by, s.width * z, s.height * z);
+    if (z >= 1.5) {
+      if (b.type === B_HALL && kd) { ctx.fillStyle = KCOLORS[kd.color]; ctx.fillRect(bx + 8 * z, by + (((fr >> 4) + b.id) & 1) * z, z, z); } // fluttering banner
+      else if (b.type === B_SMITHY && ((fr >> 3) + b.id) % 3 === 0) { ctx.fillStyle = '#ffe14a'; ctx.fillRect(bx + 2 * z, by + 5 * z, z, z); }
+      else if (b.type === B_SAWMILL && !paused) { ctx.fillStyle = '#d8dce6'; ctx.fillRect(bx + (5 + ((fr >> 3) & 1)) * z, by + 5 * z, z, z * .5); }
+      if (!paused && z >= 2 && (b.type === B_SMITHY || (b.type === B_HOUSE && b.lvl >= 1)) && (fr + b.id * 13) % 46 === 0) fxPart(b.x + .72, b.y - .1, rr(-.004, .006), -.014, 70, '#c8c8cc', 1);
+    }
+    if (b.hp < b.mhp * .6 && z >= 2) { ctx.fillStyle = 'rgba(30,20,10,.45)'; ctx.fillRect(sx + z, sy + z * 2, z * 2, z); ctx.fillRect(sx + z * 4, sy + z * 4, z * 2, z); }
   }
+  // sleepers
+  if (z >= 2 && RD.sleep) { ctx.fillStyle = '#fff'; ctx.font = '700 ' + Math.round(4 * z) + 'px system-ui'; ctx.textAlign = 'left'; for (const sl of RD.sleep) { const b = { x: sl.x - .5, y: sl.y - .5 }; const ph = (fr >> 4) % 3; ctx.globalAlpha = .9 - ph * .25; ctx.fillText('z', w2sx((b.x + .9) * TS) + ph * z, w2sy(b.y * TS) - ph * 2 * z); } ctx.globalAlpha = 1; }
   // fire
   const fs = G.fires;
   for (let n = 0; n < fs.length; n++) {
@@ -2551,10 +2768,12 @@ function render(dt, paused) {
   const us = G.units, sprites = z >= 1.15, walkPh = (fr / 9) | 0, terr = G.terr;
   const ux0 = tx0 - 1, ux1 = tx1 + 2, uy0 = ty0 - 1, uy1 = ty1 + 2;
   let sel = null;
+  const sleep = RD.sleep || (RD.sleep = []); sleep.length = 0;
   for (let n = 0; n < us.length; n++) {
     const u = us[n];
     if (u.x < ux0 || u.x > ux1 || u.y < uy0 || u.y > uy1) continue;
     if (u.id === RD.selId) sel = u;
+    if (u.tk === TK_REST && u.st === ST_WORK) { if (sleep.length < 60) sleep.push(u); continue; } // asleep indoors
     const k = KIND[u.kind], px = w2sx((u.x + u.ox) * TS), py = w2sy((u.y + u.oy) * TS);
     if (!sprites) {
       const kd = u.kid ? G.kingdoms.get(u.kid) : null;
@@ -2565,7 +2784,7 @@ function render(dt, paused) {
     const tt = terr[(u.y | 0) * W + (u.x | 0)], boat = k.civ && WATER[tt] === 1;
     const moving = u.path || k.fly;
     const s = unitSprite(u, moving && !paused ? (walkPh + u.id) & 1 : 0, u.dir < 0, boat);
-    let sc = z; if (k.civ && !boat && u.age < k.mature * YEAR) sc = z * .72; else if (u.hero) sc = z * 1.2;
+    let sc = z; if (k.civ && !boat && u.age < k.mature * YEAR) sc = z * .72; else if (k.animal && u.age < 1.5 * YEAR) sc = z * .68; else if (u.hero) sc = z * 1.2;
     let yo = 0;
     if (k.fly) { yo = -6 * z; ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(px - 4 * z, py + 2 * z, 8 * z, 2 * z); }
     else if (u.st === ST_WORK && !paused) yo = ((fr / 7 + u.id) & 1) ? -z : 0;
@@ -2573,10 +2792,15 @@ function render(dt, paused) {
     const dw = s.width * sc, dh = s.height * sc, dx = px - dw / 2, dy = py - dh + 2 * z + yo;
     if (G.tick - u.hit < 4) { ctx.globalAlpha = .55; ctx.drawImage(s, dx, dy, dw, dh); ctx.globalAlpha = 1; }
     else ctx.drawImage(s, dx, dy, dw, dh);
+    if (k.civ && u.st === ST_WORK && z >= 1.8 && TOOLCOL[u.tk]) { // swinging a tool
+      const up = ((fr / 7 + u.id) & 1), d = u.dir < 0 ? -1 : 1, hx = px + d * 3 * z, hy = dy + (up ? 0 : 2) * z;
+      ctx.fillStyle = '#6b4a2a'; ctx.fillRect(hx - z * .5, hy + z, z, z * 3);
+      ctx.fillStyle = TOOLCOL[u.tk]; ctx.fillRect(hx - z * (d > 0 ? .5 : 1.5), hy, z * 2, z);
+    } else if (u.tk === TK_EAT && u.st === ST_WORK && z >= 1.8) { ctx.fillStyle = '#e8a86a'; ctx.fillRect(px + (u.dir < 0 ? -3 : 2) * z, dy + 2 * z, z, z); }
     if (u.sick > 0) { ctx.fillStyle = '#7fe04a'; ctx.fillRect(px - z, dy - z * 2, z * 2, z * 2); }
     else if (u.hero) { ctx.fillStyle = '#ffd23c'; ctx.fillRect(px - z * .5, dy - z * 2, z, z); }
     else if (u.bless > 0 && (fr + u.id) % 20 < 10) { ctx.fillStyle = '#fff7b0'; ctx.fillRect(px + z * 2, dy, z, z); }
-    if (u.ca > 0 && z >= 2 && !boat) { ctx.fillStyle = ['#d86a4a', '#8a5a30', '#aaa', '#56729e', '#f7c62f'][u.cr]; ctx.fillRect(px - z * 3.5 * (u.dir < 0 ? -1 : 1) - z, dy + z * 2, z * 2, z * 2); }
+    if (u.ca > 0 && z >= 2 && !boat) { ctx.fillStyle = ['#d86a4a', '#8a5a30', '#aaa', '#b5543a', '#f7c62f', '#e07a2c', '#222', '#4fe3e8'][u.cr]; ctx.fillRect(px - z * 3.5 * (u.dir < 0 ? -1 : 1) - z, dy + z * 2, z * 2, z * 2); }
     if (z >= 2.6 && u.hp < u.mhp * .9) { const bw = 8 * z; ctx.fillStyle = '#000a'; ctx.fillRect(px - bw / 2, dy - z * 2.5, bw, z * 1.2); ctx.fillStyle = u.hp > u.mhp * .5 ? '#5bd24a' : u.hp > u.mhp * .25 ? '#f2c230' : '#e6483f'; ctx.fillRect(px - bw / 2, dy - z * 2.5, bw * Math.max(0, u.hp / u.mhp), z * 1.2); }
   }
   if (sel) {
@@ -2898,6 +3122,7 @@ function yearOf(t) { return (t / YEAR) | 0; }
 function unitStatus(u) {
   const k = KIND[u.kind];
   if (u.rest > 0) return T('task.rest');
+  if (u.st === ST_WORK && (u.tk === TK_EAT || u.tk === TK_REST)) return T('task.' + TASK_KEYS[u.tk]);
   if (k.fly) return T('task.fly');
   if (u.st === ST_FIGHT) return T('task.fight');
   if (u.st === ST_FLEE) return T('task.flee');
@@ -2922,8 +3147,8 @@ const PANELS = {
   kingdom(id) {
     const k = G.kingdoms.get(id); if (!k) return null;
     const king = G.unitById.get(k.kingId), cv = G.villages.get(k.cap);
-    const tot = [0, 0, 0, 0, 0]; const vs = k.vids.map(i => G.villages.get(i)).filter(Boolean);
-    for (const v of vs) for (let r = 0; r < 5; r++) tot[r] += v.stock[r];
+    const tot = new Array(NRES).fill(0); const vs = k.vids.map(i => G.villages.get(i)).filter(Boolean);
+    for (const v of vs) for (let r = 0; r < NRES; r++) tot[r] += v.stock[r] || 0;
     let h = `<div class="uhead"><span class="flag" style="background:${KCOLORS[k.color]};height:44px;width:20px"></span><div><b style="font-size:17px">${esc(k.name)}</b><br><small class="dim">${KIND[k.race].icon} ${T('title.' + kingdomTitle(k))} · ${T('races.' + KIND[k.race].key)}</small></div></div>`;
     h += kvh([[T('pop'), '👥 ' + k.pop], [T('ui.army'), '⚔️ ' + k.sold], [T('ui.villages'), '🏘️ ' + vs.length], [T('ui.founded'), T('year', yearOf(k.founded))], [T('ui.peakpop'), k.peak]]);
     if (king) h += `<button class="row" data-act="unit" data-id="${king.id}"><span style="font-size:22px">👑</span><span class="grow"><b>${esc(king.name)}</b><small>${T('ui.ruler')} · ${T('ui.years', yearOf(king.age))}</small></span><span>›</span></button>`;
@@ -2952,6 +3177,7 @@ const PANELS = {
     if (tags) h += '<div>' + tags + '</div>';
     h += kvh([[T('pop'), '👥 ' + v.pop + ' / ' + v.cap], [T('ui.army'), '⚔️ ' + v.soldiers], [T('ui.race'), KIND[v.race].icon + ' ' + T('races.' + KIND[v.race].key)], [T('ui.founded'), T('year', yearOf(v.founded))]]);
     h += `<h4>${T('ui.resources')}</h4>` + kvh(v.stock.map((s, r) => [T('res.' + RES_KEYS[r]), RES_ICON[r] + ' ' + (s | 0)]));
+    h += `<h4>${T('ui.goods')}</h4>` + kvh([[T('ui.tools'), '🛠️ ' + Math.round(v.tools || 0)], [T('ui.arms'), '🗡️ ' + Math.round(v.arms || 0)]]);
     h += `<h4>${T('ui.buildings')}</h4>` + kvh(BLD.map((b, t) => [T('bld.' + b.key), v.has[t]]).filter(p => p[1] > 0));
     return [v.name + ' · ' + T('vlvl.' + v.lvl), h, [v.x, v.y]];
   },
@@ -2967,7 +3193,12 @@ const PANELS = {
     if (tags) h += '<div>' + tags + '</div>';
     const hp = clamp(u.hp / u.mhp, 0, 1);
     h += `<small class="dim">${T('ui.health')}: ${Math.ceil(u.hp)} / ${Math.round(u.mhp)}</small><div class="bar"><i style="width:${hp * 100}%;background:${hp > .5 ? 'var(--good)' : hp > .25 ? 'var(--acc)' : 'var(--bad)'}"></i></div>`;
-    const kv = [[T('ui.age'), T('ui.years', yearOf(u.age))], [T('ui.doing'), unitStatus(u)], [T('ui.kills'), u.kills]];
+    if (k.civ && v) {
+      const full = clamp(1 - (G.tick - u.ate) / 420, 0, 1), en = clamp(1 - (G.tick - u.slept) / 1300, 0, 1);
+      h += `<div style="display:flex;gap:10px"><div style="flex:1"><small class="dim">🍖 ${T('ui.hunger')}</small><div class="bar"><i style="width:${full * 100}%;background:${full > .3 ? '#e8a86a' : 'var(--bad)'}"></i></div></div><div style="flex:1"><small class="dim">💤 ${T('ui.energy')}</small><div class="bar"><i style="width:${en * 100}%;background:${en > .25 ? 'var(--nat)' : 'var(--bad)'}"></i></div></div></div>`;
+    }
+    const kv = [[T('ui.age'), T('ui.years', yearOf(u.age)) + (k.civ ? ' ' + T('ui.sex.' + u.sex) : '')], [T('ui.doing'), unitStatus(u)], [T('ui.kills'), u.kills]];
+    if (k.civ && v && isAdult(u) && u.role === RL_WORKER && u.job >= 0) kv.push([T('ui.job'), T('job.' + JOB_KEYS[u.job])]);
     if (k.civ) { kv.push([T('ui.kids'), u.kids]); kv.push([T('ui.carry'), u.ca > 0 ? RES_ICON[u.cr] + ' ' + u.ca : T('ui.none')]); }
     h += kvh(kv);
     if (v) h += `<button class="row" data-act="village" data-id="${v.id}"><span style="font-size:18px">🏠</span><span class="grow"><b>${esc(v.name)}</b><small>${T('ui.home')}${kd ? ' · ' + esc(kd.name) : ''}</small></span><span>›</span></button>`;

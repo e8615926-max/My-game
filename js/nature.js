@@ -222,8 +222,13 @@ function worldEvents() {
   const r = rnd(), vs = [...G.villages.values()], dis = G.opts.disasters;
   // keep the wilderness alive: predators return from beyond the map's edge
   if (G.count && G.caps) {
-    if (G.count[K_WOLF] < G.caps[K_WOLF] * .3 && rnd() < .3) { const p = randomLand(t => t === T_FOREST || t === T_TAIGA); if (p && !G.owner[p[1] * G.W + p[0]]) for (let n = 0; n < 3; n++) spawnUnit(K_WOLF, p[0] + .5, p[1] + .5); }
-    if (G.count[K_BEAR] < G.caps[K_BEAR] * .3 && rnd() < .2) { const p = randomLand(t => t === T_FOREST || t === T_TAIGA || t === T_HILL); if (p && !G.owner[p[1] * G.W + p[0]]) spawnUnit(K_BEAR, p[0] + .5, p[1] + .5); }
+    for (const kind of ANIMAL_KINDS) {
+      if (G.count[kind] >= G.caps[kind] * .3 || rnd() > .3) continue;
+      const p = randomLand(t => habitatOK(kind, t)); if (!p || G.owner[p[1] * G.W + p[0]]) continue;
+      const g = KIND[kind].herd ? 4 : 2;
+      for (let m = 0; m < g; m++) spawnUnit(kind, p[0] + .5 + rr(-1.5, 1.5), p[1] + .5 + rr(-1.5, 1.5));
+      if (kind === K_SHEEP || kind === K_DEER || kind === K_COW) logEvent('ev.herd', ['@kind.' + KIND[kind].key], p[0], p[1], 'nature');
+    }
   }
   if (r < .12) { const p = randomLand(); if (p) { addRain(p[0], p[1], 8 + ri(4), 700 + ri(500), true); logEvent('ev.storm', [], p[0], p[1], 'nature'); } }
   else if (r < .16) { const big = vs.filter(v => v.pop >= 20); if (big.length && dis) { const v = pick(big); for (let n = 0; n < 3; n++) { const u = pick(v.members); if (u) u.sick = 700; } logEvent('ev.plague', [v.name], v.x, v.y, 'bad'); } }
@@ -237,11 +242,6 @@ function worldEvents() {
   else if (r < .325) { if (dis) { const p = randomLand(); if (p) { dropMeteor(p[0], p[1]); logEvent('ev.meteor', [], p[0], p[1], 'bad'); } } }
   else if (r < .335) { if (dis) { const p = randomLand(); if (p) { earthquake(p[0], p[1], 9); logEvent('ev.quake', [], p[0], p[1], 'bad'); } } }
   else if (r < .34) { if (dis) { const p = randomLand(t => t === T_MOUNT || t === T_PEAK); if (p) { startVolcano(p[0], p[1]); logEvent('ev.volcano', [], p[0], p[1], 'bad'); } } }
-  else if (r < .42) {
-    if (G.count && G.count[K_SHEEP] < G.caps[K_SHEEP] * .4) { const p = randomLand(t => t === T_GRASS); if (p) { for (let n = 0; n < 6; n++) spawnUnit(K_SHEEP, p[0] + .5 + rr(-2, 2), p[1] + .5 + rr(-2, 2)); logEvent('ev.herd', [], p[0], p[1], 'nature'); } }
-    if (G.count && G.count[K_RABBIT] < G.caps[K_RABBIT] * .3) { const p = randomLand(t => t === T_GRASS); if (p) for (let n = 0; n < 5; n++) spawnUnit(K_RABBIT, p[0] + .5 + rr(-2, 2), p[1] + .5 + rr(-2, 2)); }
-    if (G.count && G.count[K_WOLF] < 2 && rnd() < .5) { const p = randomLand(t => t === T_FOREST || t === T_TAIGA); if (p) for (let n = 0; n < 3; n++) spawnUnit(K_WOLF, p[0] + .5, p[1] + .5); }
-  }
 }
 
 /* ----- Territory ----- */
@@ -293,6 +293,11 @@ function simTick() {
 function primeWorld() {
   if (!G.opts) G.opts = { disasters: true };
   computeRegions(); rebuildGrid();
-  for (const v of G.villages.values()) { if (!v.members) v.members = []; if (!v.farmIds) v.farmIds = []; recountVillage(v); }
+  for (const v of G.villages.values()) {
+    if (!v.members) v.members = []; if (!v.farmIds) v.farmIds = [];
+    while (v.stock.length < NRES) v.stock.push(0);
+    v.arms = v.arms || 0; v.tools = v.tools || 0; v.miss = v.miss || 0;
+    recountVillage(v);
+  }
   census(); recomputeOwners();
 }

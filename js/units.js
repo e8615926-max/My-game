@@ -11,6 +11,7 @@ function spawnUnit(kind, x, y) {
     dir: rnd() < .5 ? 1 : -1, st: ST_IDLE, role: RL_WORKER, vid: 0, kid: 0, tk: 0, tt: -1, tid: 0, cr: 0, ca: 0, wt: 0,
     next: G.tick + 1 + ri(20), path: null, mode: 0, name: k.civ ? unitName(kind) : '', sex: ri(2), kills: 0, kids: 0,
     hg: 0, sick: 0, imm: 0, hero: 0, bless: 0, guard: 0, rest: 0, nom: 0, hit: -99,
+    ate: G.tick - ri(200), slept: G.tick - ri(900), fast: 0, home: 0, job: -1, jf: 0, hair: ri(4),
     ox: rr(-.28, .28), oy: rr(-.28, .28)
   };
   G.units.push(u); G.unitById.set(u.id, u);
@@ -28,7 +29,7 @@ function hostile(u, o) {
   if (ku.monster) return true;
   if (ku.civ) {
     if (ko.civ) return u.kid !== 0 && o.kid !== 0 && u.kid !== o.kid && isWar(u.kid, o.kid);
-    if (ko.pred) return o.st === ST_FIGHT;
+    if (ko.pred || ko.tough) return o.st === ST_FIGHT && !ko.small;
   }
   return false;
 }
@@ -146,7 +147,7 @@ function onArrive(u) {
     default: u.st = ST_IDLE;
   }
 }
-const WORK_TIME = [0, 50, 60, 70, 80, 30, 40, 70, 0, 30, 1, 1];
+const WORK_TIME = [0, 50, 60, 70, 80, 30, 40, 70, 0, 30, 1, 1, 14, 90];
 function startWork(u) {
   const W = G.W;
   if (u.tt >= 0) {
@@ -160,6 +161,26 @@ function startWork(u) {
   if (u.tk === TK_TRADE) { doTrade(u); return; }
   if (u.tk === TK_BUILD) { const b = G.blds.get(u.tid); if (!b || b.built) { resetTask(u); return; } }
   u.st = ST_WORK; u.wt = WORK_TIME[u.tk] || 30;
+  if (u.tk < TK_BUILD) { const v = G.villages.get(u.vid); if (v && v.tools > 0) u.wt = Math.round(u.wt * .78); } // copper tools speed up gathering
+}
+/** A villager eats one meal from the settlement's stores. */
+function eatNow(u, v, amount) {
+  if (v.stock[0] >= amount) { v.stock[0] -= amount; u.ate = G.tick; u.fast = 0; return true; }
+  u.ate = G.tick - 230; u.fast++; v.miss = (v.miss || 0) + 1;
+  if (u.fast >= 3) damage(u, 14, null);
+  return false;
+}
+function goRest(u, v) {
+  let b = G.blds.get(u.home);
+  if (!b || !b.built || b.vid !== v.id || b.type !== B_HOUSE) {
+    b = null;
+    for (let n = 0; n < 6 && !b; n++) { const c = G.blds.get(pick(v.bids)); if (c && c.built && c.type === B_HOUSE) b = c; }
+    if (!b) b = G.blds.get(v.bids[0]);
+    if (!b) return false;
+    u.home = b.id;
+  }
+  setTask(u, TK_REST, b.y * G.W + b.x, b.id);
+  return goTask(u);
 }
 function finishWork(u) {
   const W = G.W, i = u.tt, k = KIND[u.kind];
@@ -179,18 +200,22 @@ function finishWork(u) {
     }
     case TK_CHOP:
       if (t === T_FOREST || t === T_TAIGA) {
-        res = R_WOOD; amt = 5;
+        res = R_WOOD; amt = v && v.has[B_SAWMILL] ? 7 : 5;
         if (u.kind !== K_ELF || rnd() < .5) { if (G.amt[i] > 1) G.amt[i]--; else setTerr(x, y, t === T_TAIGA ? T_SNOW : T_GRASS); }
       } break;
-    case TK_STONE:
-      if (f === F_STONE) { res = R_STONE; amt = u.kind === K_DWARF ? 6 : 4; if (--G.amt[i] <= 0) setFeat(x, y, 0, 0); }
-      else if (t === T_HILL) { res = R_STONE; amt = u.kind === K_DWARF ? 4 : 2; }
+    case TK_STONE: case TK_ORE: case TK_GOLD:
+      if (f >= F_STONE) {
+        res = FEAT_RES[f]; amt = FEAT_YIELD[f];
+        if (u.kind === K_DWARF) amt = Math.ceil(amt * 1.5);
+        if (v && v.has[B_MINE]) amt = Math.ceil(amt * 1.4);
+        if (--G.amt[i] <= 0) setFeat(x, y, 0, 0);
+      } else if (t === T_HILL && u.tk === TK_STONE) { res = R_STONE; amt = u.kind === K_DWARF ? 4 : 2; }
       break;
-    case TK_ORE: if (f === F_ORE) { res = R_ORE; amt = u.kind === K_DWARF ? 5 : 3; if (--G.amt[i] <= 0) setFeat(x, y, 0, 0); } break;
-    case TK_GOLD: if (f === F_GOLD) { res = R_GOLD; amt = u.kind === K_DWARF ? 3 : 2; if (--G.amt[i] <= 0) setFeat(x, y, 0, 0); } break;
+    case TK_EAT: if (v) eatNow(u, v, 1.9); break;
+    case TK_REST: u.slept = G.tick; u.hp = Math.min(u.mhp, u.hp + 25); break;
     case TK_BERRY: if (f === F_BERRY && G.amt[i] > 0) { res = R_FOOD; amt = u.kind === K_ELF ? 7 : 5; G.amt[i] = 0; markDirty(i); } break;
     case TK_FARM: { const b = G.blds.get(u.tid); if (b && b.grow >= 100) { b.grow = 0; res = R_FOOD; amt = Math.round(10 * Math.max(.6, FERT[t])); } break; }
-    case TK_FISH: res = R_FOOD; amt = u.kind === K_HUMAN ? 5 : 4; break;
+    case TK_FISH: res = R_FOOD; amt = (u.kind === K_HUMAN ? 5 : 4) + (v && v.has[B_DOCK] ? 3 : 0); break;
   }
   u.tk = 0; u.tt = -1; u.tid = 0; u.st = ST_IDLE; u.next = G.tick + 1;
   if (res >= 0) { u.cr = res; u.ca = amt; }
@@ -240,7 +265,7 @@ function fight(u, en, k, d) {
     u.path = null;
     let dmg = k.dmg * (.7 + rnd() * .6);
     if (u.hero) dmg *= 2;
-    if (u.role === RL_SOLDIER || u.role === RL_KING) { dmg *= 1.35; const v = G.villages.get(u.vid); if (v && v.has[B_SMITHY]) dmg *= 1.25; }
+    if (u.role === RL_SOLDIER || u.role === RL_KING) { dmg *= 1.35; const v = G.villages.get(u.vid); if (v) dmg *= v.arms > 0 ? 1.35 : v.has[B_SMITHY] ? 1.1 : 1; }
     if (u.bless > 0) dmg *= 1.2;
     if (en.x > u.x) u.dir = 1; else u.dir = -1;
     if (k.range > 2) fxArrow(u.x, u.y - .3, en.x, en.y - .3, '#f4f0d0');
@@ -263,6 +288,7 @@ function thinkCiv(u, k, t) {
   if (!isAdult(u)) {
     if (WATER[t] && !u.path) { if (v) moveTo(u, v.x, v.y); else escapeTo(u); }
     else if (!u.path) { if (v) wander(u, v.x, v.y, 3); else wander(u, u.x | 0, u.y | 0, 3); }
+    if (v && tick - u.ate > 300) eatNow(u, v, 1);
     u.next = tick + 30 + ri(50);
     return;
   }
@@ -288,6 +314,15 @@ function thinkCiv(u, k, t) {
   if (u.ca > 0 || u.st === ST_RETURN) {
     if (Math.abs(u.x - v.x - .5) < 1.6 && Math.abs(u.y - v.y - .5) < 1.6) { deposit(u, v); }
     else { u.st = ST_RETURN; if (!moveTo(u, v.x, v.y)) u.next = tick + 4 + ri(6); return; }
+  }
+  // personal needs: hunger first, then sleep
+  if (tick - u.ate > 300) {
+    const away = Math.abs(u.x - v.x) + Math.abs(u.y - v.y) > 3;
+    if (!away || (u.role === RL_SOLDIER && v.atk && !u.guard)) eatNow(u, v, 1.9);
+    else if (u.role !== RL_SETTLER && u.role !== RL_TRADER) { setTask(u, TK_EAT, v.y * W + v.x, 0); if (goTask(u)) return; }
+  } else if (tick - u.slept > 1100 && u.role !== RL_SETTLER && u.role !== RL_TRADER && !(u.role === RL_SOLDIER && v.atk && !u.guard)) {
+    if (goRest(u, v)) return;
+    u.slept = tick - 900;
   }
   switch (u.role) {
     case RL_KING:
@@ -324,38 +359,66 @@ function goTask(u) {
   u.tk = 0; u.tt = -1; u.tid = 0; return false;
 }
 
+const JOB_RES = [[R_FOOD], [R_FOOD], [R_WOOD], [R_STONE, R_ORE, R_GOLD, R_COPPER, R_COAL, R_GEM], []];
+const _w = new Float32Array(NRES);
+/** How badly the settlement needs each resource right now. */
+function resWeights(v, dwarf) {
+  const s = v.stock, pop = v.pop, w = _w, fNeed = pop * 6 + 12, lim = 150 + pop * 12;
+  w[0] = s[0] < fNeed ? 3.2 * (1 - s[0] / fNeed) + .35 : .15;
+  w[1] = s[1] < 10 ? 2 : s[1] < 30 + pop * 1.5 ? 1 : .1;
+  w[2] = pop >= 7 ? (s[2] < 25 + pop ? .8 : .06) : .08;
+  w[3] = pop >= 14 ? (s[3] < 15 ? .4 : .03) : 0;
+  w[4] = pop >= 12 ? (s[4] < 40 ? .22 : .03) : 0;
+  w[5] = pop >= 8 ? (s[5] < 10 ? .4 : .03) : 0;
+  w[6] = pop >= 14 ? (s[6] < 10 ? .35 : .03) : 0;
+  w[7] = pop >= 18 ? .08 : 0;
+  if (dwarf) for (let r = 2; r < NRES; r++) w[r] *= 1.8;
+  if (s[0] > lim * 2) w[0] = 0;
+  for (let r = 1; r < NRES; r++) if (s[r] > (r === 1 || r === 2 ? lim : lim * .5)) w[r] = 0;
+  return w;
+}
+function pickRes(w, list) {
+  let tot = 0;
+  if (list) { for (const r of list) tot += w[r]; if (tot <= 0) return -1; let x = rnd() * tot; for (const r of list) if ((x -= w[r]) < 0) return r; return list[0]; }
+  for (let r = 0; r < NRES; r++) tot += w[r];
+  if (tot <= 0) return -1;
+  let x = rnd() * tot; for (let r = 0; r < NRES; r++) if ((x -= w[r]) < 0) return r;
+  return 0;
+}
+function assignJob(u, w) {
+  let mine = 0; for (let r = 2; r < NRES; r++) mine += w[r];
+  const jw = [w[0] * .72, w[0] * .28, w[1], mine, .28];
+  let tot = 0; for (const x of jw) tot += x;
+  let x = rnd() * tot; u.job = JOB_BUILDER;
+  for (let j = 0; j < 5; j++) if ((x -= jw[j]) < 0) { u.job = j; break; }
+  u.jf = 0;
+}
 function workerThink(u, v, k) {
-  const s = v.stock, pop = v.pop, W = G.W;
-  if (v.sites > 0 && rnd() < .7) {
+  const W = G.W, w = resWeights(v, u.kind === K_DWARF);
+  if (u.job == null || u.job < 0 || u.jf > 3 || rnd() < .015) assignJob(u, w);
+  if (v.sites > 0 && rnd() < (u.job === JOB_BUILDER ? 1 : .3)) {
     for (let n = v.bids.length - 1; n >= 0; n--) {
       const b = G.blds.get(v.bids[n]);
       if (b && !b.built && !G.fire[b.y * W + b.x]) { setTask(u, TK_BUILD, b.y * W + b.x, b.id); if (goTask(u)) return; break; }
     }
   }
-  const fNeed = pop * 6 + 12;
-  let wF = s[0] < fNeed ? 3.2 * (1 - s[0] / fNeed) + .35 : .15;
-  let wW = s[1] < 10 ? 2 : s[1] < 30 + pop * 1.5 ? 1 : .1;
-  let wS = pop >= 7 ? (s[2] < 25 + pop ? .8 : .06) : .08;
-  let wO = pop >= 16 ? (s[3] < 15 ? .4 : .03) : 0;
-  let wG = pop >= 12 ? (s[4] < 40 ? .22 : .03) : 0;
-  if (u.kind === K_DWARF) { wS *= 1.6; wO *= 2; wG *= 2; }
-  // full storehouses: nothing more to gather
-  const lim = 150 + pop * 12;
-  if (s[0] > lim * 2) wF = 0; if (s[1] > lim) wW = 0; if (s[2] > lim) wS = 0; if (s[3] > lim * .5) wO = 0; if (s[4] > lim) wG = 0;
-  if (wF + wW + wS + wO + wG <= 0) { wander(u, v.x, v.y, Math.min(v.radius, 6)); u.next = G.tick + 40 + ri(60); return; }
-  let r = rnd() * (wF + wW + wS + wO + wG), res;
-  if ((r -= wF) < 0) res = R_FOOD; else if ((r -= wW) < 0) res = R_WOOD; else if ((r -= wS) < 0) res = R_STONE; else if ((r -= wO) < 0) res = R_ORE; else res = R_GOLD;
-  if (findTask(u, v, res, 1) || findTask(u, v, res, 2.4) || (res === R_WOOD && findTask(u, v, res, 4.5))) return;
-  if (res !== R_FOOD && findTask(u, v, R_FOOD, 1)) return;
+  // most of the time a villager follows their trade; otherwise they help where needed
+  let res = rnd() < .75 ? pickRes(w, JOB_RES[u.job]) : -1, own = res >= 0;
+  if (res < 0) res = pickRes(w, null);
+  if (res < 0) { wander(u, v.x, v.y, Math.min(v.radius, 6)); u.next = G.tick + 40 + ri(60); return; }
+  const pref = own ? (u.job === JOB_HUNTER ? 2 : u.job === JOB_FARMER ? 1 : 0) : 0;
+  if (findTask(u, v, res, 1, pref) || findTask(u, v, res, 2.4, pref) || (res === R_WOOD && findTask(u, v, res, 4.5, 0))) { u.jf = 0; return; }
+  if (own) u.jf++;
+  if (res !== R_FOOD && findTask(u, v, R_FOOD, 1, 0)) return;
   wander(u, v.x, v.y, Math.min(v.radius, 6));
   u.next = G.tick + 20 + ri(30);
 }
 
-function findTask(u, v, res, scale) {
+function findTask(u, v, res, scale, pref) {
   const W = G.W, R = Math.round((v.radius + 7) * scale), ureg = G.region[(u.y | 0) * W + (u.x | 0)];
   let best = -1, bd = 1e9, bk = 0, bid = 0;
   if (res === R_FOOD) {
-    const fs = v.farmIds;
+    const fs = pref === 2 ? null : v.farmIds;
     if (fs) for (let n = 0; n < fs.length; n++) {
       const b = G.blds.get(fs[n]);
       if (b && b.built && b.grow >= 100 && b.res < G.tick) {
@@ -364,9 +427,9 @@ function findTask(u, v, res, scale) {
       }
     }
     if (best >= 0) { const b = G.blds.get(bid); b.res = G.tick + 500; setTask(u, TK_FARM, best, bid); if (goTask(u)) return true; b.res = 0; return false; }
-    if (rnd() < .25) { // hunt
-      let prey = null, pd = 100;
-      forUnitsNear(u.x, u.y, 9, (o, d2) => { if (KIND[o.kind].prey && d2 < pd) { pd = d2; prey = o; } });
+    if (pref !== 1 && rnd() < (pref === 2 ? 1 : .15)) { // hunt
+      let prey = null, pd = pref === 2 ? 200 : 100;
+      forUnitsNear(u.x, u.y, pref === 2 ? 14 : 9, (o, d2) => { const ko = KIND[o.kind]; if ((ko.prey || ko.tough) && d2 < pd) { pd = d2; prey = o; } });
       if (prey) { u.tk = TK_HUNT; u.tid = prey.id; u.st = ST_HUNT; u.wt = 0; u.next = G.tick + 1; return true; }
     }
   }
@@ -385,8 +448,7 @@ function findTask(u, v, res, scale) {
       }
     } else if (res === R_WOOD) { if (t === T_FOREST || t === T_TAIGA) tk = TK_CHOP; }
     else if (res === R_STONE) { if (f === F_STONE) tk = TK_STONE; else if (t === T_HILL && !f && n > 12 && !G.bldAt[i]) tk = TK_STONE; }
-    else if (res === R_ORE) { if (f === F_ORE) tk = TK_ORE; }
-    else if (f === F_GOLD) tk = TK_GOLD;
+    else if (f === RES_FEAT[res]) tk = res === R_GOLD ? TK_GOLD : TK_ORE;
     if (!tk || G.region[si] !== ureg || G.fire[si]) continue;
     const o = G.owner[si];
     if (o && o !== v.id) { const ov = G.villages.get(o); if (ov && ov.kid !== v.kid) continue; }
@@ -394,7 +456,7 @@ function findTask(u, v, res, scale) {
     if (d < bd) { bd = d; best = si; bk = tk; }
   }
   if (best < 0) { if (sp >= 0 && scale > 2) v.spot[res] = -1; return false; }
-  if (!v.spot) v.spot = [-1, -1, -1, -1, -1];
+  if (!v.spot || v.spot.length < NRES) v.spot = [-1, -1, -1, -1, -1, -1, -1, -1];
   if (bk !== TK_FISH || sp < 0) v.spot[res] = best;
   setTask(u, bk, best, 0);
   return goTask(u);
@@ -445,19 +507,9 @@ function thinkAnimal(u, k) {
   const tick = G.tick;
   u.next = tick + 24 + ri(30);
   const cnt = G.count ? G.count[u.kind] : 0, cap = G.caps ? G.caps[u.kind] : 50;
-  if (k.prey) {
-    let th = null;
-    forUnitsNear(u.x, u.y, 3.5, o => { const ko = KIND[o.kind]; if (ko.pred || ko.monster || (o.tk === TK_HUNT && o.tid === u.id)) th = o; });
-    if (th) { fleeFrom(u, th.x, th.y); u.next = tick + 12; return; }
-    if (u.age > 1.5 * YEAR && cnt < cap && rnd() < (u.kind === K_RABBIT ? .05 : .035)) {
-      let near = 0; forUnitsNear(u.x, u.y, 5, o => { if (o.kind === u.kind) near++; });
-      if (near < 7) spawnUnit(u.kind, u.x, u.y);
-    }
-    if (!u.path && rnd() < .6) wander(u, u.x | 0, u.y | 0, 4);
-    return;
-  }
-  u.hg++;
-  if (u.st === ST_FIGHT) {
+  const grown = u.age > 1.5 * YEAR;
+  // fighting (predators hunting, or anything that was attacked and fights back)
+  if (u.st === ST_FIGHT && !k.prey) {
     const o = G.unitById.get(u.tid);
     if (o && !o.dead && udist(u, o) < 11) {
       const d = udist(u, o);
@@ -467,15 +519,43 @@ function thinkAnimal(u, k) {
     }
     u.st = ST_IDLE; u.tid = 0;
   }
-  if (u.hg > 10) {
-    let prey = null, pd = 1e9;
-    const wantCiv = u.hg > 35 || (u.kind === K_BEAR && rnd() < .2);
-    forUnitsNear(u.x, u.y, 12, (o, d2) => { const ko = KIND[o.kind]; if ((ko.prey || (wantCiv && ko.civ)) && d2 < pd) { pd = d2; prey = o; } });
-    if (prey) { u.st = ST_FIGHT; u.tid = prey.id; u.next = tick + 2; return; }
+  if (k.pred) {
+    u.hg++;
+    if (u.hg > 10) {
+      let prey = null, pd = 1e9;
+      const wantCiv = !k.small && (u.hg > 35 || (u.kind === K_BEAR && rnd() < .2));
+      forUnitsNear(u.x, u.y, 12, (o, d2) => {
+        const ko = KIND[o.kind];
+        if (d2 < pd && ((ko.prey && (!k.small || ko.small)) || (wantCiv && ko.civ) || (u.kind === K_BEAR && ko.tough && u.hg > 25))) { pd = d2; prey = o; }
+      });
+      if (prey) { u.st = ST_FIGHT; u.tid = prey.id; u.next = tick + 2; return; }
+    }
+    if (u.hg > 150) { damage(u, 8, null); if (u.dead) return; }
+    if (u.hg < 70 && u.age > 3 * YEAR && cnt < cap && rnd() < .045) spawnUnit(u.kind, u.x, u.y);
+  } else {
+    if (k.prey) {
+      let th = null;
+      forUnitsNear(u.x, u.y, 3.8, o => { const ko = KIND[o.kind]; if ((ko.pred && (!ko.small || k.small)) || ko.monster || (o.tk === TK_HUNT && o.tid === u.id)) th = o; });
+      if (th) {
+        fleeFrom(u, th.x, th.y); u.next = tick + 12;
+        // panic spreads through the herd
+        if (k.herd) forUnitsNear(u.x, u.y, 4, o => { if (o.kind === u.kind && !o.path) { fleeFrom(o, th.x, th.y); o.next = tick + 14; } });
+        return;
+      }
+    }
+    if (grown && cnt < cap && rnd() < k.breed) {
+      let near = 0; forUnitsNear(u.x, u.y, 5, o => { if (o.kind === u.kind) near++; });
+      if (near < 7) spawnUnit(u.kind, u.x, u.y);
+    }
   }
-  if (u.hg > 150) { damage(u, 8, null); if (u.dead) return; }
-  if (u.hg < 70 && u.age > 3 * YEAR && cnt < cap && rnd() < .045) spawnUnit(u.kind, u.x, u.y);
-  if (!u.path) wander(u, u.x | 0, u.y | 0, 6);
+  if (u.path) return;
+  // herd animals drift back towards their companions
+  if (k.herd && rnd() < .5) {
+    let mate = null, md = 1e9;
+    forUnitsNear(u.x, u.y, 10, (o, d2) => { if (o !== u && o.kind === u.kind && d2 > 9 && d2 < md) { md = d2; mate = o; } });
+    if (mate && linePath(u, (u.x + (mate.x - u.x) * .6) | 0, (u.y + (mate.y - u.y) * .6) | 0)) return;
+  }
+  if (rnd() < .65) wander(u, u.x | 0, u.y | 0, k.pred ? 6 : 4);
 }
 
 /* ----- Dragon ----- */

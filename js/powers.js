@@ -57,7 +57,10 @@ const POWERS = [
   { id: 'berry', cat: 'nature', icon: '🍓', type: 'spray', gap: 1.5, fn: featPower(F_BERRY, 3) },
   { id: 'stone', cat: 'nature', icon: '🪨', type: 'spray', gap: 1.5, fn: featPower(F_STONE, 30) },
   { id: 'ore', cat: 'nature', icon: '⛏️', type: 'spray', gap: 1.5, fn: featPower(F_ORE, 20) },
+  { id: 'copper', cat: 'nature', icon: '🟠', type: 'spray', gap: 1.5, fn: featPower(F_COPPER, 20) },
+  { id: 'coal', cat: 'nature', icon: '⚫', type: 'spray', gap: 1.5, fn: featPower(F_COAL, 24) },
   { id: 'gold', cat: 'nature', icon: '🪙', type: 'spray', gap: 1.5, fn: featPower(F_GOLD, 12) },
+  { id: 'gem', cat: 'nature', icon: '💎', type: 'spray', gap: 1.5, fn: featPower(F_GEM, 8) },
   // creatures
   { id: 'human', cat: 'life', icon: '🧑', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_HUMAN) },
   { id: 'elf', cat: 'life', icon: '🧝', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_ELF) },
@@ -65,6 +68,10 @@ const POWERS = [
   { id: 'dwarf', cat: 'life', icon: '🧔', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_DWARF) },
   { id: 'sheep', cat: 'life', icon: '🐑', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_SHEEP) },
   { id: 'rabbit', cat: 'life', icon: '🐇', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_RABBIT) },
+  { id: 'deer', cat: 'life', icon: '🦌', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_DEER) },
+  { id: 'cow', cat: 'life', icon: '🐄', type: 'spray', gap: 1.3, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_COW) },
+  { id: 'boar', cat: 'life', icon: '🐗', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_BOAR) },
+  { id: 'fox', cat: 'life', icon: '🦊', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_FOX) },
   { id: 'wolf', cat: 'life', icon: '🐺', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_WOLF) },
   { id: 'bear', cat: 'life', icon: '🐻', type: 'spray', gap: 2, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_BEAR) },
   { id: 'skeleton', cat: 'life', icon: '💀', type: 'spray', gap: 1.6, nobrush: 1, desc: 'd.spawn', fn: spawnPower(K_SKEL) },
@@ -87,7 +94,7 @@ const POWERS = [
   { id: 'demolish', cat: 'divine', icon: '🔨', type: 'paint', desc: 'd.demolish', fn: (x, y, r) => brushTiles(x, y, r, (tx, ty, i) => { const b = G.blds.get(G.bldAt[i]); if (b) destroyBuilding(b); }) },
   { id: 'gift', cat: 'divine', icon: '🎁', type: 'tap', nobrush: 1, desc: 'd.gift', fn: (x, y) => {
     const v = G.villages.get(G.owner[y * G.W + x]); if (!v) return 't.novillage';
-    v.stock[0] += 80; v.stock[1] += 50; v.stock[2] += 35; v.stock[3] += 10; v.stock[4] += 12;
+    v.stock[0] += 80; v.stock[1] += 50; v.stock[2] += 35; v.stock[3] += 10; v.stock[4] += 12; v.stock[5] += 10; v.stock[6] += 10; v.stock[7] += 2;
     fxBurst(v.x + .5, v.y + .5, 20, ['#fd4', '#fff', '#8f8'], .12, 30); return ['t.gift', v.name];
   } },
   { id: 'hero', cat: 'divine', icon: '🦸', type: 'tap', nobrush: 1, desc: 'd.hero', fn: (x, y) => {

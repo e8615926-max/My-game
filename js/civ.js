@@ -72,9 +72,9 @@ function kingdomTitle(k) { return k.pop >= 150 || k.vids.length >= 6 ? 'empire' 
 function foundVillage(x, y, race, kid, founder, silent) {
   const id = G.nextVid = (G.nextVid || 0) + 1;
   const v = {
-    id, name: placeName(race), kid: 0, race, x, y, founded: G.tick, stock: [36, 24, 0, 0, 0], pop: 0, adults: 0, soldiers: 0,
+    id, name: placeName(race), kid: 0, race, x, y, founded: G.tick, stock: [36, 24, 0, 0, 0, 0, 0, 0], arms: 0, tools: 0, miss: 0, pop: 0, adults: 0, soldiers: 0,
     cap: 5, sites: 0, atk: 0, atkUntil: 0, lastAtk: -9999, siege: 0, radius: 6, lvl: 0, starve: 0, lastSettler: G.tick, lastTrade: G.tick,
-    bids: [], farmIds: [], nb: 0, farms: 0, has: [0, 0, 0, 0, 0, 0, 0, 0], upd: ri(30), cons: 0, empty: 0, members: []
+    bids: [], farmIds: [], nb: 0, farms: 0, has: new Array(BLD.length).fill(0), upd: ri(30), cons: 0, empty: 0, members: []
   };
   G.villages.set(id, v);
   let k = kid ? G.kingdoms.get(kid) : null, fresh = false;
@@ -110,7 +110,7 @@ function destroyBuilding(b, silent) {
 }
 function recountVillage(v) {
   const keep = []; v.farmIds.length = 0;
-  let cap = 0, farms = 0, sites = 0; const has = [0, 0, 0, 0, 0, 0, 0, 0];
+  let cap = 0, farms = 0, sites = 0; const has = new Array(BLD.length).fill(0);
   for (const id of v.bids) {
     const b = G.blds.get(id); if (!b) continue;
     keep.push(id);
@@ -145,7 +145,21 @@ function siteOK(v, x, y, farm) {
   return ((x - v.x) & 1) === 0 && ((y - v.y) & 1) === 0;
 }
 function chooseSite(v, type) {
-  const farm = type === B_FARM;
+  const farm = type === B_FARM, W = G.W;
+  if (type === B_DOCK) { // must touch water
+    for (let n = 0; n < 90; n++) {
+      const R = v.radius, x = v.x + ri(2 * R + 1) - R, y = v.y + ri(2 * R + 1) - R;
+      if (!siteOK(v, x, y, true)) continue;
+      for (let d = 0; d < 4; d++) { const nx = x + DX8[d], ny = y + DY8[d]; if (inb(nx, ny) && WATER[G.terr[ny * W + nx]]) return [x, y]; }
+    }
+    return null;
+  }
+  if (type === B_MINE && v.spot) { // next to a deposit
+    for (const r of [R_ORE, R_COPPER, R_COAL, R_GOLD, R_GEM, R_STONE]) {
+      const sp = v.spot[r]; if (sp == null || sp < 0) continue;
+      for (let n = 0; n < 14; n++) { const x = (sp % W) + ri(5) - 2, y = ((sp / W) | 0) + ri(5) - 2; if (siteOK(v, x, y, true) && !G.feat[y * W + x]) return [x, y]; }
+    }
+  }
   if (farm && v.farmIds.length && rnd() < .75) {
     for (let n = 0; n < 12; n++) {
       const b = G.blds.get(pick(v.farmIds)); if (!b) continue;
@@ -172,6 +186,9 @@ function planBuild(v, k) {
   if (v.farms < 2 || (v.farms < farmNeed && v.stock[0] < pop * 5)) want = B_FARM;
   else if (v.cap < pop + 3) want = B_HOUSE;
   else if (v.farms < farmNeed) want = B_FARM;
+  else if (pop >= 7 && !h[B_SAWMILL] && v.spot && v.spot[R_WOOD] >= 0) want = B_SAWMILL;
+  else if (pop >= 8 && !h[B_DOCK] && !(v.noDock > G.tick)) want = B_DOCK;
+  else if (pop >= 9 && !h[B_MINE] && v.spot && v.spot.some((s, r) => r >= 2 && s >= 0)) want = B_MINE;
   else if (pop >= 10 && !h[B_BARRACKS]) want = B_BARRACKS;
   else if (pop >= 15 && !h[B_MARKET]) want = B_MARKET;
   else if (pop >= 12 && !h[B_TOWER]) want = B_TOWER;
@@ -181,12 +198,12 @@ function planBuild(v, k) {
   else if (v.lvl >= 1 && v.stock[1] >= 12 && v.stock[2] >= 10) { // upgrade a house
     for (const id of v.bids) {
       const b = G.blds.get(id);
-      if (b && b.built && b.type === B_HOUSE && b.lvl < Math.min(2, v.lvl)) { b.lvl++; b.mhp += 60; b.hp = b.mhp; v.stock[1] -= 8; v.stock[2] -= 8; recountVillage(v); return; }
+      if (b && b.built && b.type === B_HOUSE && b.lvl < v.lvl) { b.lvl++; b.mhp += 60; b.hp = b.mhp; v.stock[1] -= 8; v.stock[2] -= 8; recountVillage(v); return; }
     }
     if (v.cap < pop + 6) want = B_HOUSE;
   }
   if (want < 0 || !canAfford(v, want)) { if (want !== B_HOUSE && want !== B_FARM && v.cap < pop + 2 && canAfford(v, B_HOUSE)) want = B_HOUSE; else return; }
-  const s = chooseSite(v, want); if (!s) return;
+  const s = chooseSite(v, want); if (!s) { if (want === B_DOCK) v.noDock = G.tick + 4000; return; }
   const c = BLD[want].cost; for (let r = 1; r < 5; r++) v.stock[r] -= c[r];
   placeBuilding(v, want, s[0], s[1], false);
 }
@@ -221,7 +238,7 @@ function doTrade(u) {
   u.tk = 0; u.tt = -1;
   if (!v || !pv || isWar(v.kid, pv.kid)) { u.role = RL_WORKER; resetTask(u); return; }
   let give = 1, get = 1, gb = -1e9, tb = -1e9;
-  for (let r = 0; r < 4; r++) { const a = v.stock[r] - pv.stock[r]; if (a > gb) { gb = a; give = r; } if (-a > tb) { tb = -a; get = r; } }
+  for (let r = 0; r < NRES; r++) { if (r === R_GOLD) continue; const a = v.stock[r] - pv.stock[r]; if (a > gb) { gb = a; give = r; } if (-a > tb) { tb = -a; get = r; } }
   const g1 = Math.min(10, v.stock[give] | 0); v.stock[give] -= g1; pv.stock[give] += g1;
   const g2 = Math.min(10, pv.stock[get] | 0); pv.stock[get] -= g2; v.stock[get] += g2;
   pv.stock[R_GOLD] += 4;
@@ -262,19 +279,24 @@ function updateVillage(v) {
     }
     if (!done) { removeVillage(v, true); return; }
   }
-  // food
+  // economy cycle: famine check and workshops turning raw materials into goods
   if (++v.cons >= 4) {
     v.cons = 0;
-    v.stock[0] -= v.adults * .75 + (v.pop - v.adults) * .4;
-    if (v.stock[0] < 0) {
-      v.stock[0] = 0;
-      if (v.stock[R_GOLD] >= 5 && v.has[B_MARKET]) { v.stock[R_GOLD] -= 5; v.stock[0] += 18; }
-      else {
-        v.starve++;
-        for (const u of m) if (!u.dead && rnd() < .22) damage(u, 22, null);
-        if (v.starve === 3 && tick - (v.lastFamine || -9999) > 2400) { v.lastFamine = tick; logEvent('ev.famine', [v.name], v.x, v.y, 'bad'); }
-      }
-    } else v.starve = 0;
+    const s = v.stock;
+    if (s[0] < v.pop && s[R_GOLD] >= 5 && v.has[B_MARKET]) { s[R_GOLD] -= 5; s[0] += 18; } // import food
+    if (v.miss > 0) { v.starve++; if (v.starve === 3 && tick - (v.lastFamine || -9999) > 2400) { v.lastFamine = tick; logEvent('ev.famine', [v.name], v.x, v.y, 'bad'); } }
+    else v.starve = 0;
+    v.miss = 0;
+    if (v.has[B_SMITHY] && s[R_ORE] >= 2 && s[R_COAL] >= 1 && v.arms < v.soldiers * 3 + 6) { s[R_ORE] -= 2; s[R_COAL] -= 1; v.arms += 2; }
+    v.arms = Math.max(0, v.arms - v.soldiers * .04);
+    if (s[R_COPPER] >= 1 && v.tools < v.pop) { s[R_COPPER] -= 1; v.tools += 4; }
+    v.tools = Math.max(0, v.tools - v.pop * .03);
+    if (v.has[B_MARKET] && s[R_GEM] >= 1) { s[R_GEM] -= 1; s[R_GOLD] += 5; }
+    s[R_STONE] += v.has[B_MINE]; s[0] += v.has[B_DOCK] * 2;
+    if (v.has[B_SAWMILL]) { // foresters replant
+      const R = v.radius + 3, x = v.x + ri(2 * R + 1) - R, y = v.y + ri(2 * R + 1) - R;
+      if (inb(x, y)) { const i = y * W + x; if (G.terr[i] === T_GRASS && !G.bldAt[i] && !G.feat[i] && !nearBuilding(x, y)) { setTerr(x, y, T_FOREST); G.amt[i] = 2; } }
+    }
   }
   // farms grow
   for (const id of v.farmIds) { const b = G.blds.get(id); if (b && b.grow < 100) b.grow = Math.min(100, b.grow + 10); }
@@ -298,7 +320,7 @@ function updateVillage(v) {
         let bx = v.x, by = v.y;
         for (let n = 0; n < 4; n++) { const b = G.blds.get(pick(v.bids)); if (b && b.built && b.type === B_HOUSE) { bx = b.x; by = b.y; break; } }
         const baby = spawnUnit(mother.kind, bx + .5, by + .5);
-        if (baby) { baby.vid = v.id; baby.kid = v.kid; mother.kids++; v.stock[0] -= 3; G.stats.births++; G.civCount++; }
+        if (baby) { baby.ate = tick; baby.vid = v.id; baby.kid = v.kid; mother.kids++; v.stock[0] -= 3; G.stats.births++; G.civCount++; }
       }
     }
   }
@@ -360,7 +382,7 @@ function updateVillage(v) {
 /** Recount populations (run every few ticks). */
 function census() {
   for (const v of G.villages.values()) { v.members.length = 0; v.adults = 0; v.soldiers = 0; }
-  const cnt = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  const cnt = new Array(KIND.length).fill(0);
   let civ = 0;
   for (const u of G.units) {
     if (u.dead) continue;
@@ -376,7 +398,7 @@ function census() {
   G.count = cnt; G.civCount = civ;
   if (!G.caps || G.capsVer !== G.regionTick) {
     let land = 0; const terr = G.terr; for (let i = 0; i < terr.length; i++) if (WALK[terr[i]]) land++;
-    G.caps = [0, 0, 0, 0, land / 110, land / 170, land / 800, land / 1700, 60, 3]; G.capsVer = G.regionTick;
+    G.caps = KIND.map(k => k.cap ? land / k.cap : 0); G.capsVer = G.regionTick;
   }
 }
 

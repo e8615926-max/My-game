@@ -2,7 +2,7 @@
 /* ===== World state, generation, tile operations, regions, pathfinding ===== */
 let G = null;
 
-const WORLD_SIZES = { small: [128, 96, 1200], medium: [192, 144, 2000], large: [256, 192, 3000], huge: [320, 240, 4000] };
+const WORLD_SIZES = { small: [160, 120, 1500], medium: [256, 192, 2600], large: [352, 264, 3800], huge: [448, 336, 5000] };
 
 function newState(W, H, seed, maxUnits) {
   const N = W * H;
@@ -135,9 +135,7 @@ function generateWorld(sizeKey, seed, populate) {
     const i = y * W + x, t = terr[i], h = hash2(x, y, seed + 500);
     if (t === T_FOREST || t === T_TAIGA) G.amt[i] = 4;
     else if (t === T_HILL) {
-      if (h < .10) { G.feat[i] = F_STONE; G.amt[i] = 30; }
-      else if (h < .14) { G.feat[i] = F_ORE; G.amt[i] = 20; }
-      else if (h < .155) { G.feat[i] = F_GOLD; G.amt[i] = 12; }
+      if (h < .09) { G.feat[i] = F_STONE; G.amt[i] = 30; }
     } else if (t === T_GRASS) {
       if (h < .022) { G.feat[i] = F_BERRY; G.amt[i] = 3; }
       else if (h < .034) { G.feat[i] = F_STONE; G.amt[i] = 30; }
@@ -145,6 +143,24 @@ function generateWorld(sizeKey, seed, populate) {
       if (h < .012) { G.feat[i] = F_STONE; G.amt[i] = 30; }
       else if (h < .017) { G.feat[i] = F_GOLD; G.amt[i] = 12; }
       else if (h < .024) { G.feat[i] = F_ORE; G.amt[i] = 20; }
+    }
+  }
+  // ore veins: copper, iron, coal, gold and gems cluster in the highlands
+  const veinTypes = [F_COPPER, F_COPPER, F_COPPER, F_ORE, F_ORE, F_ORE, F_COAL, F_COAL, F_COAL, F_GOLD, F_GEM];
+  const nv = Math.max(12, (N / 330) | 0);
+  for (let k = 0; k < nv; k++) {
+    let x = (r() * W) | 0, y = (r() * H) | 0, ok = false;
+    for (let tr = 0; tr < 40 && !ok; tr++) {
+      x = (r() * W) | 0; y = (r() * H) | 0; const t = terr[y * W + x];
+      ok = t === T_HILL || (tr > 25 && (t === T_GRASS || t === T_DESERT || t === T_SNOW) && el[y * W + x] > pSand);
+    }
+    if (!ok) continue;
+    const f = veinTypes[(r() * veinTypes.length) | 0], len = 3 + ((r() * 6) | 0);
+    for (let s = 0; s < len; s++) {
+      if (!inb(x, y)) break;
+      const i = y * W + x, t = terr[i];
+      if (WALK[t] && t !== T_FOREST && t !== T_TAIGA && t !== T_SAND) { G.feat[i] = f; G.amt[i] = FEAT_AMT[f]; }
+      x += ((r() * 3) | 0) - 1; y += ((r() * 3) | 0) - 1;
     }
   }
   computeRegions();
@@ -199,12 +215,16 @@ function seedLife(r) {
       u.vid = v.id; u.kid = v.kid;
     }
   }
-  const animals = [[K_SHEEP, N / 420], [K_RABBIT, N / 600], [K_WOLF, N / 2600], [K_BEAR, N / 5200]];
-  for (const [kind, cnt] of animals) for (let n = 0; n < cnt; n++) {
-    for (let tr = 0; tr < 12; tr++) {
-      const x = (r() * W) | 0, y = (r() * H) | 0, t = G.terr[y * W + x];
-      const ok = kind === K_BEAR ? (t === T_FOREST || t === T_TAIGA || t === T_HILL) : kind === K_WOLF ? (t === T_FOREST || t === T_TAIGA || t === T_SNOW || t === T_GRASS) : (t === T_GRASS);
-      if (ok) { const u = spawnUnit(kind, x + .5, y + .5); if (u) u.age = rr(0, KIND[kind].life[0] * .6) * YEAR; break; }
+  let land = 0; for (let i = 0; i < N; i++) if (WALK[G.terr[i]]) land++;
+  for (const kind of ANIMAL_KINDS) {
+    const cnt = land / KIND[kind].cap * (KIND[kind].pred ? .7 : .55);
+    for (let n = 0; n < cnt; n++) for (let tr = 0; tr < 12; tr++) {
+      const x = (r() * W) | 0, y = (r() * H) | 0;
+      if (habitatOK(kind, G.terr[y * W + x])) {
+        const g = KIND[kind].herd ? 2 + ((r() * 3) | 0) : 1; n += g - 1;
+        for (let m = 0; m < g; m++) { const u = spawnUnit(kind, x + .5 + (r() - .5) * 3, y + .5 + (r() - .5) * 3); if (u) u.age = rr(0, KIND[kind].life[0] * .6) * YEAR; }
+        break;
+      }
     }
   }
 }

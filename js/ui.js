@@ -199,6 +199,7 @@ function yearOf(t) { return (t / YEAR) | 0; }
 function unitStatus(u) {
   const k = KIND[u.kind];
   if (u.rest > 0) return T('task.rest');
+  if (u.st === ST_WORK && (u.tk === TK_EAT || u.tk === TK_REST)) return T('task.' + TASK_KEYS[u.tk]);
   if (k.fly) return T('task.fly');
   if (u.st === ST_FIGHT) return T('task.fight');
   if (u.st === ST_FLEE) return T('task.flee');
@@ -223,8 +224,8 @@ const PANELS = {
   kingdom(id) {
     const k = G.kingdoms.get(id); if (!k) return null;
     const king = G.unitById.get(k.kingId), cv = G.villages.get(k.cap);
-    const tot = [0, 0, 0, 0, 0]; const vs = k.vids.map(i => G.villages.get(i)).filter(Boolean);
-    for (const v of vs) for (let r = 0; r < 5; r++) tot[r] += v.stock[r];
+    const tot = new Array(NRES).fill(0); const vs = k.vids.map(i => G.villages.get(i)).filter(Boolean);
+    for (const v of vs) for (let r = 0; r < NRES; r++) tot[r] += v.stock[r] || 0;
     let h = `<div class="uhead"><span class="flag" style="background:${KCOLORS[k.color]};height:44px;width:20px"></span><div><b style="font-size:17px">${esc(k.name)}</b><br><small class="dim">${KIND[k.race].icon} ${T('title.' + kingdomTitle(k))} · ${T('races.' + KIND[k.race].key)}</small></div></div>`;
     h += kvh([[T('pop'), '👥 ' + k.pop], [T('ui.army'), '⚔️ ' + k.sold], [T('ui.villages'), '🏘️ ' + vs.length], [T('ui.founded'), T('year', yearOf(k.founded))], [T('ui.peakpop'), k.peak]]);
     if (king) h += `<button class="row" data-act="unit" data-id="${king.id}"><span style="font-size:22px">👑</span><span class="grow"><b>${esc(king.name)}</b><small>${T('ui.ruler')} · ${T('ui.years', yearOf(king.age))}</small></span><span>›</span></button>`;
@@ -253,6 +254,7 @@ const PANELS = {
     if (tags) h += '<div>' + tags + '</div>';
     h += kvh([[T('pop'), '👥 ' + v.pop + ' / ' + v.cap], [T('ui.army'), '⚔️ ' + v.soldiers], [T('ui.race'), KIND[v.race].icon + ' ' + T('races.' + KIND[v.race].key)], [T('ui.founded'), T('year', yearOf(v.founded))]]);
     h += `<h4>${T('ui.resources')}</h4>` + kvh(v.stock.map((s, r) => [T('res.' + RES_KEYS[r]), RES_ICON[r] + ' ' + (s | 0)]));
+    h += `<h4>${T('ui.goods')}</h4>` + kvh([[T('ui.tools'), '🛠️ ' + Math.round(v.tools || 0)], [T('ui.arms'), '🗡️ ' + Math.round(v.arms || 0)]]);
     h += `<h4>${T('ui.buildings')}</h4>` + kvh(BLD.map((b, t) => [T('bld.' + b.key), v.has[t]]).filter(p => p[1] > 0));
     return [v.name + ' · ' + T('vlvl.' + v.lvl), h, [v.x, v.y]];
   },
@@ -268,7 +270,12 @@ const PANELS = {
     if (tags) h += '<div>' + tags + '</div>';
     const hp = clamp(u.hp / u.mhp, 0, 1);
     h += `<small class="dim">${T('ui.health')}: ${Math.ceil(u.hp)} / ${Math.round(u.mhp)}</small><div class="bar"><i style="width:${hp * 100}%;background:${hp > .5 ? 'var(--good)' : hp > .25 ? 'var(--acc)' : 'var(--bad)'}"></i></div>`;
-    const kv = [[T('ui.age'), T('ui.years', yearOf(u.age))], [T('ui.doing'), unitStatus(u)], [T('ui.kills'), u.kills]];
+    if (k.civ && v) {
+      const full = clamp(1 - (G.tick - u.ate) / 420, 0, 1), en = clamp(1 - (G.tick - u.slept) / 1300, 0, 1);
+      h += `<div style="display:flex;gap:10px"><div style="flex:1"><small class="dim">🍖 ${T('ui.hunger')}</small><div class="bar"><i style="width:${full * 100}%;background:${full > .3 ? '#e8a86a' : 'var(--bad)'}"></i></div></div><div style="flex:1"><small class="dim">💤 ${T('ui.energy')}</small><div class="bar"><i style="width:${en * 100}%;background:${en > .25 ? 'var(--nat)' : 'var(--bad)'}"></i></div></div></div>`;
+    }
+    const kv = [[T('ui.age'), T('ui.years', yearOf(u.age)) + (k.civ ? ' ' + T('ui.sex.' + u.sex) : '')], [T('ui.doing'), unitStatus(u)], [T('ui.kills'), u.kills]];
+    if (k.civ && v && isAdult(u) && u.role === RL_WORKER && u.job >= 0) kv.push([T('ui.job'), T('job.' + JOB_KEYS[u.job])]);
     if (k.civ) { kv.push([T('ui.kids'), u.kids]); kv.push([T('ui.carry'), u.ca > 0 ? RES_ICON[u.cr] + ' ' + u.ca : T('ui.none')]); }
     h += kvh(kv);
     if (v) h += `<button class="row" data-act="village" data-id="${v.id}"><span style="font-size:18px">🏠</span><span class="grow"><b>${esc(v.name)}</b><small>${T('ui.home')}${kd ? ' · ' + esc(kd.name) : ''}</small></span><span>›</span></button>`;
